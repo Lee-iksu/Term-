@@ -13,6 +13,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import model.User;
 import network.MultiChatData;
 import network.MultiChatUI;
 import service.UserDatabase;
@@ -37,8 +38,15 @@ public class LoginController implements ActionListener {
             return;
         }
 
-        if (!UserDatabase.shared().isValidUser(id, pw)) {
+        if (!UserDatabase.shared().validateUser(id, pw)) {
             JOptionPane.showMessageDialog(null, "로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.");
+            return;
+        }
+
+        // 로그인 성공 후 User 정보 로드
+        User user = UserDatabase.shared().getUserById(id);
+        if (user == null) {
+            JOptionPane.showMessageDialog(null, "유저 정보를 불러오지 못했습니다.");
             return;
         }
 
@@ -47,17 +55,17 @@ public class LoginController implements ActionListener {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-
-            // 이후 화면 전환
+            // 창 닫기
             JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(idField);
             topFrame.dispose();
 
+            // 메인 채팅 화면 진입
             SwingUtilities.invokeLater(() -> {
-                MainFrame frame = new MainFrame(id, socket, out, in);
+                MainFrame frame = new MainFrame(user.getId(), socket, out, in);
                 MultiChatData chatData = new MultiChatData();
-                MultiChatUI chatUI = new MultiChatUI(id);
+                MultiChatUI chatUI = new MultiChatUI(user.getId());
                 MultiChatController chatController = new MultiChatController(chatData, chatUI, frame);
-                chatController.appMain(); // 여기서 connectServer() → login 메시지 전송함
+                chatController.appMain();
             });
 
         } catch (Exception ex) {

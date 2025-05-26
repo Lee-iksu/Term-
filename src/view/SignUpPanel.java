@@ -80,11 +80,16 @@ public class SignUpPanel extends JPanel {
             return;
         }
 
-        // 비밀번호는 User 객체 생성 시 암호화됨
-        db.addUser(new User(id, pw));
-        JOptionPane.showMessageDialog(this, "회원가입 성공! 비밀번호가 암호화되어 저장되었습니다.");
-        SwingUtilities.getWindowAncestor(this).dispose(); // 창 닫기
+        User newUser = new User(id, pw); // 암호화 포함됨
+
+        if (db.registerUser(newUser)) {
+            JOptionPane.showMessageDialog(this, "회원가입 성공! 비밀번호가 암호화되어 DB에 저장되었습니다.");
+            SwingUtilities.getWindowAncestor(this).dispose(); // 창 닫기
+        } else {
+            JOptionPane.showMessageDialog(this, "회원가입 실패: DB 저장 중 오류가 발생했습니다.");
+        }
     }
+
 
     private JPanel centerPanel(String label, JComponent field) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));

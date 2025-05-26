@@ -207,38 +207,21 @@ public class MultiChatController implements Runnable {
 
                     String targetId = m.getId();
                     boolean isMyself = m.getId().equals(mainFrame.getUserId());
-                    
-                    System.out.println("[DEBUG] nickname = " + nickname);
-                    System.out.println("[DEBUG] intro = " + intro);
-                    System.out.println("[DEBUG] imageBase64 length = " + (imageBase64 != null ? imageBase64.length() : "null"));
 
-                    if (isMyself) {
-                        User me = UserDatabase.shared().getUserById(mainFrame.getUserId());
-                        if (me != null) {
-                            me.setNickname(nickname);
-                            me.setIntro(intro);
-                            me.setImageBase64(imageBase64);
-
-                            // 내 프로필 UI 갱신
-                            SwingUtilities.invokeLater(() -> {
-                                mainFrame.getFriendPanel().displayUserInfo(nickname, intro, true, imageBase64);
-                            });
-                        }
-                    }
-
+                    System.out.println("[DEBUG] PROFILE_RESPONSE 수신: " + nickname + " / 나냐? " + isMyself);
 
                     SwingUtilities.invokeLater(() -> {
-                        if (mainFrame == null) {
-                            System.out.println("[DEBUG] mainFrame is null");
-                            return;
+                        if (mainFrame != null && mainFrame.getFriendPanel() != null) {
+                            mainFrame.getFriendPanel().displayUserInfo(nickname, intro, isMyself, imageBase64);
+                            if (isMyself) {
+                                mainFrame.updateGreeting();  // greetingLabel도 같이 갱신
+                            }
                         }
-
-                        System.out.println("[DEBUG] PROFILE_RESPONSE 수신: nickname=" + nickname + ", isMyself=" + isMyself);
-                        mainFrame.getFriendPanel().displayUserInfo(nickname, intro, isMyself, imageBase64);
                     });
 
                     continue;
                 }
+
                 
                 else if ("ROOM_CREATED".equals(m.getType())) {
                     int roomId = Integer.parseInt(m.getArgs()[0]);

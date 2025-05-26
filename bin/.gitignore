@@ -1,8 +1,6 @@
-/Controller/
-/app/
-/img/
-/model/
 /network/
+/Controller/
 /service/
-/util/
 /view/
+/model/
+/server/

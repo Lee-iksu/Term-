@@ -9,12 +9,13 @@ public class User {
     private String intro;
     private String imageBase64;
 
-    // 추가 필드 (보안/상태 관리)
+    // 인증/상태 관련 필드
     private String name;
     private int failCount;
     private boolean blocked;
     private boolean online;
 
+    // ===== 기본 생성자 =====
     public User() {
         this.nickname = "사용자";
         this.intro = "";
@@ -24,12 +25,25 @@ public class User {
         this.online = false;
     }
 
+    // ===== 일반 회원가입용 생성자 (평문 비밀번호 전달받아 암호화) =====
     public User(String id, String password) {
         this.id = id;
         this.password = PasswordEncryption.encrypt(password);
         this.nickname = id != null ? id : "사용자";
         this.intro = "";
         this.imageBase64 = "";
+        this.failCount = 0;
+        this.blocked = false;
+        this.online = false;
+    }
+
+    // ===== DB 조회용 생성자 (암호화된 비밀번호 직접 주입) =====
+    public User(String id, String encryptedPassword, String nickname, String intro, String imageBase64) {
+        this.id = id;
+        this.password = encryptedPassword;
+        this.nickname = (nickname != null && !nickname.trim().isEmpty()) ? nickname : id;
+        this.intro = (intro != null) ? intro : "";
+        this.imageBase64 = (imageBase64 != null) ? imageBase64 : "";
         this.failCount = 0;
         this.blocked = false;
         this.online = false;
@@ -49,6 +63,7 @@ public class User {
         return password;
     }
 
+    // 비밀번호는 항상 암호화해서 저장
     public void setPassword(String password) {
         this.password = PasswordEncryption.encrypt(password);
     }
@@ -77,7 +92,7 @@ public class User {
         this.imageBase64 = imageBase64 != null ? imageBase64 : "";
     }
 
-    // ===== 인증 관련 추가 필드 =====
+    // ===== 인증/상태 관련 =====
 
     public String getName() {
         return name;
@@ -111,7 +126,7 @@ public class User {
         this.online = online;
     }
 
-    // ===== 인증 =====
+    // ===== 비밀번호 검증 =====
 
     public boolean verifyPassword(String inputPassword) {
         String decryptedPassword = PasswordEncryption.decrypt(this.password);

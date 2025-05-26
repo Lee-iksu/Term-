@@ -18,23 +18,27 @@ public class SignUpController implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        String id = idField.getText();
-        String pw = new String(pwField.getPassword());
+        String id = idField.getText().trim();
+        String pw = new String(pwField.getPassword()).trim();
 
         if (id.isEmpty() || pw.isEmpty()) {
             JOptionPane.showMessageDialog(null, "ID와 비밀번호를 모두 입력하세요.");
             return;
         }
-        
+
         UserDatabase db = UserDatabase.shared();
 
         if (db.isDuplicateId(id)) {
             JOptionPane.showMessageDialog(null, "이미 존재하는 ID입니다.");
             return;
         }
-        
-        // 비밀번호는 User 객체 생성 시 암호화됨
-        UserDatabase.shared().addUser(new User(id, pw));
-        JOptionPane.showMessageDialog(null, "회원가입 완료! 비밀번호가 암호화되어 저장되었습니다.");
+
+        User newUser = new User(id, pw); // 자동 암호화 포함
+
+        if (db.registerUser(newUser)) {
+            JOptionPane.showMessageDialog(null, "회원가입 완료! DB에 암호화된 정보가 저장되었습니다.");
+        } else {
+            JOptionPane.showMessageDialog(null, "회원가입 실패: DB 저장 중 오류가 발생했습니다.");
+        }
     }
 }

@@ -1,4 +1,3 @@
-// ProfileController.java (controller)
 package Controller;
 
 import java.awt.Image;
@@ -21,8 +20,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import model.Message;
-import model.User;
-import service.UserDatabase;
 import view.MainFrame;
 import view.ProfilePanel;
 
@@ -57,18 +54,11 @@ public class ProfileController {
         msg.setType("PROFILE_SAVE");
         msg.setId(userId);
         msg.setProfile(profileObj.toString());
+
         out.println(gson.toJson(msg));
 
-        User me = UserDatabase.shared().getUserById(userId);
-        if (me != null) {
-            me.setNickname(nickname);
-            me.setIntro(intro);
-            me.setImageBase64(imageBase64);
-        }
-
-        mainFrame.updateGreeting();
-        mainFrame.getFriendPanel().updateMyNickname();
-        JOptionPane.showMessageDialog(null, "프로필이 저장되었습니다.");
+        // 서버가 PROFILE_RESPONSE로 최신 상태 내려줌 → 거기서 화면 업데이트하면 됨
+        JOptionPane.showMessageDialog(null, "프로필 저장 요청이 전송되었습니다.");
     }
 
     public void selectProfileImage(ProfilePanel panel) {
@@ -101,16 +91,15 @@ public class ProfileController {
         request.setRcvid(userId);
         out.println(gson.toJson(request));
     }
-    
+
     public void showUserProfile(String targetId) {
-    	System.out.println("[클라이언트] PROFILE_REQUEST 전송: " + targetId);
+        System.out.println("[클라이언트] PROFILE_REQUEST 전송: " + targetId);
         Message request = new Message();
         request.setType("PROFILE_REQUEST");
-        request.setId(userId);        // 요청 보내는 사람 
-        request.setRcvid(targetId);   // 보고 싶은 사람 
+        request.setId(userId);
+        request.setRcvid(targetId);
         out.println(gson.toJson(request));
     }
-
 
     public void decodeAndDisplayImage(String imageBase64, JLabel photoLabel) {
         if (imageBase64 != null && !imageBase64.isEmpty()) {
@@ -123,5 +112,12 @@ public class ProfileController {
                 e.printStackTrace();
             }
         }
+    }
+
+    // 서버에서 PROFILE_RESPONSE 받았을 때 호출되면 되는 메서드 예시
+    public void applyUpdatedProfile(String nickname, String intro, String imageBase64) {
+        mainFrame.updateGreeting();
+        mainFrame.getFriendPanel().updateMyNickname();
+        // 필요시 local 캐시에도 반영 가능
     }
 }

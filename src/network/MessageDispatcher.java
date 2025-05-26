@@ -7,7 +7,6 @@ import com.google.gson.JsonParser;
 import model.Message;
 import model.User;
 import service.UserDatabase;
-import service.UserProfileManager;
 
 public class MessageDispatcher {
     public static void dispatch(Message msg, ClientHandler handler, ServerCore server) {
@@ -18,15 +17,20 @@ public class MessageDispatcher {
         switch (msg.getType()) {
             case "login":
                 handler.setClientId(msg.getId());
+
+                // DB에 존재하지 않으면 기본 유저 등록
                 if (UserDatabase.shared().getUserById(msg.getId()) == null) {
                     User user = new User(msg.getId(), "");
                     user.setNickname(msg.getId());
                     user.setIntro("");
-                    UserDatabase.shared().addUser(user);
+                    user.setImageBase64("");
+                    UserDatabase.shared().registerUser(user);  // ✅ 변경됨
                 }
+
                 if (!server.getUserList().contains(msg.getId())) {
                     server.getUserList().add(msg.getId());
                 }
+
                 server.updateUserListBroadcast();
                 ui.log("사용자 " + msg.getId() + " 로그인했습니다.");
                 break;
@@ -42,10 +46,12 @@ public class MessageDispatcher {
                 res.setType("PROFILE_RESPONSE");
                 res.setId(msg.getRcvid());
                 res.setRcvid(msg.getId());
+
                 JsonObject profile = new JsonObject();
                 profile.addProperty("nickname", u.getNickname());
                 profile.addProperty("intro", u.getIntro());
                 profile.addProperty("image", u.getImageBase64() != null ? u.getImageBase64() : "");
+
                 res.setProfile(profile.toString());
                 server.sendTo(msg.getId(), gson.toJson(res));
                 break;
@@ -55,21 +61,22 @@ public class MessageDispatcher {
                 String nick = prof.get("nickname").getAsString();
                 String intro = prof.get("intro").getAsString();
                 String image = prof.has("image") ? prof.get("image").getAsString() : "";
-                UserProfileManager.saveProfile(msg.getId(), nick, intro);
-                User usr = UserDatabase.shared().getUserById(msg.getId());
-                if (usr != null) {
-                    usr.setNickname(nick);
-                    usr.setIntro(intro);
-                    usr.setImageBase64(image);
-                }
+
+                // DB 업데이트 처리
+                UserDatabase.shared().updateProfile(msg.getId(), nick, intro, image);
+
+                // 최신 데이터 반영 후 응답
+                User updated = UserDatabase.shared().getUserById(msg.getId());
                 Message reply = new Message();
                 reply.setType("PROFILE_RESPONSE");
                 reply.setId(msg.getId());
                 reply.setRcvid(msg.getId());
+
                 JsonObject refreshed = new JsonObject();
-                refreshed.addProperty("nickname", usr.getNickname());
-                refreshed.addProperty("intro", usr.getIntro());
-                refreshed.addProperty("image", usr.getImageBase64());
+                refreshed.addProperty("nickname", updated.getNickname());
+                refreshed.addProperty("intro", updated.getIntro());
+                refreshed.addProperty("image", updated.getImageBase64());
+
                 reply.setProfile(refreshed.toString());
                 server.sendTo(msg.getId(), gson.toJson(reply));
                 server.updateUserListBroadcast();
@@ -95,14 +102,8 @@ public class MessageDispatcher {
                     roomCreatedMsg2.setRcvid(targetId);
                     roomCreatedMsg2.setArgs(new String[]{String.valueOf(roomId), roomName, senderId});
 
-                    String json1 = gson.toJson(roomCreatedMsg1);
-                    String json2 = gson.toJson(roomCreatedMsg2);
-
-                    System.out.println("[DEBUG] sendTo " + senderId + " → " + json1);
-                    server.sendTo(senderId, json1);
-
-                    System.out.println("[DEBUG] sendTo " + targetId + " → " + json2);
-                    server.sendTo(targetId, json2);
+                    server.sendTo(senderId, gson.toJson(roomCreatedMsg1));
+                    server.sendTo(targetId, gson.toJson(roomCreatedMsg2));
 
                     System.out.println("[DEBUG] ROOM_CREATED 전송 완료: " + roomName + " (" + roomId + ")");
                 } catch (Exception e) {
@@ -111,8 +112,6 @@ public class MessageDispatcher {
                 }
                 break;
             }
-
-
 
             default:
                 server.broadcast(gson.toJson(msg));
