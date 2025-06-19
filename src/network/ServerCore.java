@@ -1,12 +1,18 @@
 // ServerCore.java (서버 실행 및 연결 관리)
 package network;
 
+import model.Chatroom;
+import model.Message;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.google.gson.Gson;
+
 
 public class ServerCore implements Runnable {
     private ServerSocket serverSocket;
@@ -14,6 +20,35 @@ public class ServerCore implements Runnable {
     private List<String> userList = new ArrayList<>();
     private Logger logger = Logger.getLogger(ServerCore.class.getName());
     private ServerUI ui;
+ // ServerCore.java 내부
+    private final Map<String, List<String>> groupChatRooms = new ConcurrentHashMap<>();
+
+    
+    private Map<Integer, Chatroom> chatrooms = new ConcurrentHashMap<>();
+
+    public Map<Integer, Chatroom> getChatrooms() {
+        return chatrooms;
+    }
+    public void createGroupChatRoom(String roomName, List<String> participantIds) {
+        groupChatRooms.put(roomName, participantIds);
+    }
+ // ServerCore.java 안에 추가
+    public ClientHandler getClientHandler(String userId) {
+        for (ClientHandler c : clients) {
+            if (userId.equals(c.getClientId())) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public List<String> getGroupChatParticipants(String roomName) {
+        return groupChatRooms.get(roomName);
+    }
+
+    public boolean roomExists(String roomName) {
+        return groupChatRooms.containsKey(roomName);
+    }
 
     public ServerCore(ServerUI ui) {
         this.ui = ui;
@@ -24,6 +59,30 @@ public class ServerCore implements Runnable {
                 System.exit(0);
             }
         });
+    }
+    public void sendAllChatroomsTo(String userId) {
+        for (Chatroom room : chatrooms.values()) {
+            if (room.getMembers().contains(userId)) {
+                Message roomMsg = new Message();
+                roomMsg.setType("ROOM_CREATED");
+                roomMsg.setId("server");
+                roomMsg.setRcvid(userId);
+                roomMsg.setArgs(new String[] {
+                    String.valueOf(room.getId()), 
+                    room.getName(), 
+                    getOtherMember(room.getMembers(), userId)
+                });
+                String json = new Gson().toJson(roomMsg);
+                sendTo(userId, json);
+            }
+        }
+    }
+
+    private String getOtherMember(List<String> members, String self) {
+        for (String m : members) {
+            if (!m.equals(self)) return m;
+        }
+        return "";
     }
 
     @Override

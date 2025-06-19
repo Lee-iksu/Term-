@@ -10,16 +10,37 @@ public class ChatRoomListPanel extends JPanel {
     private DefaultListModel<String> roomListModel = new DefaultListModel<>();
     private JList<String> roomList = new JList<>(roomListModel);
     private BiConsumer<String, Integer> onRoomSelected; // (roomName, roomId)
-
+    private JButton groupCreateButton;
+    private Runnable onGroupCreateClicked;
+    
+    
+    
     public ChatRoomListPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(Color.WHITE);
 
         JLabel title = new JLabel("채팅방 목록");
-        title.setFont(new Font("맑은 고딕", Font.BOLD, 16));
+        title.setFont(new Font("마리오 고딕", Font.BOLD, 16));
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        roomList.setFont(new Font("맑은 고딕", Font.PLAIN, 13));
+        groupCreateButton = new JButton("단체 채팅 생성");
+        groupCreateButton.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
+        groupCreateButton.setFocusPainted(false);
+        groupCreateButton.setBackground(new Color(102, 204, 204));
+        groupCreateButton.setForeground(Color.WHITE);
+        groupCreateButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        groupCreateButton.addActionListener(e -> {
+            if (onGroupCreateClicked != null) {
+                onGroupCreateClicked.run();
+            }
+        });
+
+        topPanel.add(title, BorderLayout.WEST);
+        topPanel.add(groupCreateButton, BorderLayout.EAST);
+
+        roomList.setFont(new Font("마리오 고딕", Font.PLAIN, 13));
         roomList.setSelectionBackground(new Color(220, 240, 255));
         JScrollPane scrollPane = new JScrollPane(roomList);
 
@@ -38,11 +59,20 @@ public class ChatRoomListPanel extends JPanel {
         });
 
         add(title, BorderLayout.NORTH);
+        add(topPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
+    }
+
+    public void addChatRoom(String roomName, int roomId) {
+        roomListModel.addElement(formatRoomName(roomName, roomId));
     }
 
     public void addRoom(String roomName, int roomId) {
         roomListModel.addElement(formatRoomName(roomName, roomId));
+    }
+    
+    public void setGroupRoomCreationHandler(Runnable handler) {
+        this.onGroupCreateClicked = handler;
     }
 
     private String formatRoomName(String name, int id) {
@@ -50,7 +80,6 @@ public class ChatRoomListPanel extends JPanel {
     }
 
     private int extractRoomId(String displayName) {
-        // 예: "test1님과의 대화 [ID:42]" → 42
         try {
             int start = displayName.indexOf("[ID:") + 4;
             int end = displayName.indexOf("]");

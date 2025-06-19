@@ -1,5 +1,6 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Chatroom {
@@ -7,6 +8,8 @@ public class Chatroom {
     private String name;
     private boolean isGroup;
     private List<String> members;
+    private List<ChatMessage> messages = new ArrayList<>();
+
 
     public Chatroom() {}
 
@@ -42,5 +45,13 @@ public class Chatroom {
 
     public void setMembers(List<String> members) {
         this.members = members;
+    }
+    
+    public void addMessage(ChatMessage msg) {
+        messages.add(msg);
+    }
+
+    public List<ChatMessage> getMessages() {
+        return messages;
     }
 }

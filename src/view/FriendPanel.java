@@ -181,6 +181,11 @@ public class FriendPanel extends JPanel {
         this.revalidate();
         this.repaint();
     }
+    
+    public DefaultListModel<String> getFriendListModel() {
+        return friendListModel;
+    }
+
 
     private void setProfileImageFromBase64(String imageBase64) {
         if (imageBase64 != null && !imageBase64.isEmpty()) {

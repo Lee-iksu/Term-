@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -31,6 +32,7 @@ import service.UserDatabase;
 public class MainFrame extends JFrame {
     private JPanel contentPanel;
     private CardLayout cardLayout;
+    private MultiChatController controller; // ← 추가
 
     private FriendPanel friendPanel;
     private ProfilePanel profilePanel;
@@ -38,6 +40,7 @@ public class MainFrame extends JFrame {
     private ChatPanel chatPanel;
     private SchedulePanel schedulePanel;
     private JLabel greetingLabel;
+ // 필드 추가
 
     private final String userId;
     private final User myUser;
@@ -47,10 +50,11 @@ public class MainFrame extends JFrame {
 
     private ChatRoomController chatRoomController;
 
-    public MainFrame(String userId, Socket socket, PrintWriter out, BufferedReader in) {
+    public MainFrame(String userId, Socket socket, PrintWriter out, BufferedReader in, MultiChatController controller)  {
         this.userId = userId;
         this.socket = socket;
         this.out = out;
+        this.controller = controller; // ← 추가
 
         User origin = UserDatabase.shared().getUserById(userId);
         this.myUser = new User(origin.getId(), origin.getPassword());
@@ -113,12 +117,29 @@ public class MainFrame extends JFrame {
         friendPanel.setProfileController(profileController);
 
         // ChatRoomController 설정
-        MultiChatController controller = new MultiChatController(null, null, this); // 실제 인스턴스는 외부에서 set
-        controller.setIO(socket, out, in);
-        
-        chatRoomController = new ChatRoomController(controller, userId, this);
-        controller.setChatRoomController(chatRoomController);
+        this.chatRoomController = new ChatRoomController(controller, userId, this);
+        controller.setChatRoomController(this.chatRoomController);
+        friendPanel.setChatRoomController(this.chatRoomController);
+        this.chatRoomController.setListPanel(chatRoomListPanel);
         friendPanel.setChatRoomController(chatRoomController);
+        
+        
+     // 단체 채팅 생성 버튼 핸들러 등록
+        chatRoomListPanel.setGroupRoomCreationHandler(() -> {
+            // 친구 리스트 가져오기
+            java.util.List<String> friends = new ArrayList<>(friendPanel.getFriendListModel().elements().asIterator().next().length());
+            for (int i = 0; i < friendPanel.getFriendListModel().getSize(); i++) {
+                String id = friendPanel.getFriendListModel().getElementAt(i);
+                if (!id.equals(userId)) {
+                    friends.add(id);
+                }
+            }
+
+            new GroupChatSetupDialog(this, friends, (roomName, selectedIds) -> {
+                chatRoomController.createGroupChatRoom(roomName, selectedIds);
+            }).setVisible(true);
+        });
+
 
         contentPanel.add(friendPanel, "FRIEND");
         contentPanel.add(chatRoomListPanel, "CHAT");
@@ -128,10 +149,20 @@ public class MainFrame extends JFrame {
         add(contentPanel, BorderLayout.CENTER);
 
         chatRoomListPanel.setRoomSelectionHandler((roomName, roomId) -> {
-            this.chatPanel = new ChatPanel(null, userId, roomId);
+            this.chatPanel = new ChatPanel(chatRoomController.getController(), userId, roomId);
             contentPanel.add(chatPanel, "CHAT_ROOM");
             cardLayout.show(contentPanel, "CHAT_ROOM");
+
+            // ✅ 메시지 요청 전송 (JSON 형식, id 포함)
+            Message getMsg = new Message();
+            getMsg.setType("GET_MESSAGES");
+            getMsg.setRoomId(roomId);
+            getMsg.setId(userId);  // ❗ 반드시 추가해야 NPE 방지됨
+            controller.send(getMsg);
         });
+
+
+
 
         friendBtn.addActionListener(e -> {
             cardLayout.show(contentPanel, "FRIEND");
@@ -242,8 +273,9 @@ public class MainFrame extends JFrame {
     }
 
     public void showChatRoom(String roomName, int roomId) {
-        this.chatPanel = new ChatPanel(null, userId, roomId);
+        this.chatPanel = new ChatPanel(chatRoomController.getController(), userId, roomId); // ✅ controller 전달
         contentPanel.add(chatPanel, "CHAT_ROOM");
         cardLayout.show(contentPanel, "CHAT_ROOM");
     }
+
 }

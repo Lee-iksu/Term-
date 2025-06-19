@@ -1,4 +1,3 @@
-// ClientHandler.java (클라이언트별 스레드)
 package network;
 
 import java.io.BufferedReader;
@@ -8,6 +7,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import Controller.ChatRoomController;
 import model.Message;
@@ -31,9 +32,21 @@ public class ClientHandler extends Thread {
             out = new PrintWriter(socket.getOutputStream(), true);
 
             String msg;
+            Gson gson = new Gson();
+
             while ((msg = in.readLine()) != null) {
-                Message message = new Gson().fromJson(msg, Message.class);
-                MessageDispatcher.dispatch(message, this, server);
+                try {
+                    JsonElement element = JsonParser.parseString(msg);
+                    if (element.isJsonObject()) {
+                        Message message = gson.fromJson(element, Message.class);
+                        MessageDispatcher.dispatch(message, this, server);
+                    } else {
+                        System.err.println("[ERROR] JSON 객체가 아님: " + msg);
+                    }
+                } catch (Exception e) {
+                    System.err.println("[ERROR] 메시지 파싱 실패: " + msg);
+                    e.printStackTrace();
+                }
             }
         } catch (IOException e) {
             server.getUI().log("[클라이언트] 예외: " + e.getMessage());
@@ -53,10 +66,11 @@ public class ClientHandler extends Thread {
     public String getClientId() {
         return clientId;
     }
-    
+
     public ChatRoomController getChatRoomController() {
         return chatRoomController;
     }
+
     public void setChatRoomController(ChatRoomController chatRoomController) {
         this.chatRoomController = chatRoomController;
     }

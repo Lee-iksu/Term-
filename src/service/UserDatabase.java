@@ -52,7 +52,7 @@ public class UserDatabase {
         }
     }
 
-    public boolean validateUser(String id, String password) {
+    public boolean isValidUser(String id, String password) {
         String sql = "SELECT password FROM user WHERE id = ?";
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -148,4 +148,10 @@ public class UserDatabase {
         }
         return list;
     }
+    
+    public void addUser(User user) {
+        registerUser(user);
+    }
+
+    
 }
