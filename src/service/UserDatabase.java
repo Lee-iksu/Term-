@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class UserDatabase {
     private static final UserDatabase instance = new UserDatabase();
-    private static final String DB_URL = "jdbc:sqlite:src/server/game.db";
+    private static final String DB_URL = "jdbc:sqlite:game.db";
 
     private UserDatabase() {
         try (Connection conn = DriverManager.getConnection(DB_URL)) {

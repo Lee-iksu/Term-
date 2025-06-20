@@ -172,13 +172,18 @@ public class MessageDispatcher {
                 String nick = prof.get("nickname").getAsString();
                 String intro = prof.get("intro").getAsString();
                 String image = prof.has("image") ? prof.get("image").getAsString() : "";
-                UserProfileManager.saveProfile(msg.getId(), nick, intro);
+
+                // ✅ 여기 추가
+                boolean saved = UserDatabase.shared().updateProfile(msg.getId(), nick, intro, image);
+                System.out.println("[DEBUG] updateProfile 저장 성공 여부: " + saved);
+
                 User usr = UserDatabase.shared().getUserById(msg.getId());
                 if (usr != null) {
                     usr.setNickname(nick);
                     usr.setIntro(intro);
                     usr.setImageBase64(image);
                 }
+
                 Message reply = new Message();
                 reply.setType("PROFILE_RESPONSE");
                 reply.setId(msg.getId());
@@ -191,6 +196,7 @@ public class MessageDispatcher {
                 server.sendTo(msg.getId(), gson.toJson(reply));
                 server.updateUserListBroadcast();
                 break;
+
             
             case "SEND_MSG": {
                 int roomId = msg.getRoomId();
