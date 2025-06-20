@@ -141,6 +141,10 @@ public class FriendPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
     }
+    
+    public String getUserId() {
+        return this.userId;
+    }
 
     public void updateFriendList(List<String> users) {
         SwingUtilities.invokeLater(() -> {

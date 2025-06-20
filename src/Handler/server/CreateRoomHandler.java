@@ -1,6 +1,7 @@
-package Handler;
+package Handler.server;
 
 import com.google.gson.Gson;
+
 import model.Chatroom;
 import model.Message;
 import network.ClientHandler;

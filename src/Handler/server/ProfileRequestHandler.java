@@ -1,7 +1,8 @@
-package Handler;
+package Handler.server;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+
 import model.Message;
 import model.User;
 import network.ClientHandler;

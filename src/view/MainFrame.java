@@ -277,5 +277,9 @@ public class MainFrame extends JFrame {
         contentPanel.add(chatPanel, "CHAT_ROOM");
         cardLayout.show(contentPanel, "CHAT_ROOM");
     }
+    
+    public ChatRoomController getChatRoomController() {
+        return this.chatRoomController;
+    }
 
 }

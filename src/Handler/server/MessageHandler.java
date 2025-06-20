@@ -1,4 +1,4 @@
-package Handler;
+package Handler.server;
 
 import model.Message;
 import network.ClientHandler;
