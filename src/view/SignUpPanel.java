@@ -1,22 +1,24 @@
 package view;
 
+import presenter.SignUpPresenter;
+
 import javax.swing.*;
 import java.awt.*;
 
-import model.User;
-import service.UserDatabase;
-
-public class SignUpPanel extends JPanel {
+public class SignUpPanel extends JPanel implements SignUpView {
     private JTextField idField;
     private JPasswordField pwField;
     private JPasswordField pwCheckField;
     private JButton signUpButton;
 
+    private SignUpPresenter presenter;
+
     public SignUpPanel() {
+        presenter = new SignUpPresenter(this);
+
         setBackground(Color.WHITE);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        // 타이틀
         JLabel title = new JLabel("회원가입");
         title.setFont(new Font("SansSerif", Font.BOLD, 28));
         title.setForeground(new Color(102, 204, 204));
@@ -26,11 +28,9 @@ public class SignUpPanel extends JPanel {
         add(title);
         add(Box.createVerticalStrut(20));
 
-        // 입력창
         idField = new JTextField(15);
         pwField = new JPasswordField(15);
         pwCheckField = new JPasswordField(15);
-
         stylizeField(idField);
         stylizeField(pwField);
         stylizeField(pwCheckField);
@@ -40,56 +40,22 @@ public class SignUpPanel extends JPanel {
         add(centerPanel("비밀번호 확인", pwCheckField));
         add(Box.createVerticalStrut(20));
 
-        // 버튼
         signUpButton = new JButton("가입");
         stylizeButton(signUpButton);
-        signUpButton.addActionListener(e -> handleSignUp());
+        signUpButton.addActionListener(e -> presenter.onSignUpClicked());
 
         JPanel btnPanel = new JPanel();
         btnPanel.setBackground(Color.WHITE);
         btnPanel.add(signUpButton);
         add(btnPanel);
-        
-        // 비밀번호 보안 안내 메시지
-        JLabel securityInfo = new JLabel("* 비밀번호는 암호화되어 안전하게 저장됩니다");
+
+        JLabel securityInfo = new JLabel("* 비밀번호는 암호화되어 저장됩니다");
         securityInfo.setFont(new Font("SansSerif", Font.ITALIC, 11));
         securityInfo.setForeground(Color.GRAY);
         securityInfo.setAlignmentX(CENTER_ALIGNMENT);
         add(Box.createVerticalStrut(10));
         add(securityInfo);
     }
-
-    private void handleSignUp() {
-        String id = idField.getText().trim();
-        String pw = new String(pwField.getPassword());
-        String pwCheck = new String(pwCheckField.getPassword());
-
-        if (id.isEmpty() || pw.isEmpty() || pwCheck.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "모든 항목을 입력해주세요.");
-            return;
-        }
-
-        if (!pw.equals(pwCheck)) {
-            JOptionPane.showMessageDialog(this, "비밀번호가 일치하지 않습니다.");
-            return;
-        }
-
-        UserDatabase db = UserDatabase.shared();
-        if (db.isDuplicateId(id)) {
-            JOptionPane.showMessageDialog(this, "이미 존재하는 ID입니다.");
-            return;
-        }
-
-        User newUser = new User(id, pw); // 암호화 포함됨
-
-        if (db.registerUser(newUser)) {
-            JOptionPane.showMessageDialog(this, "회원가입 성공! 비밀번호가 암호화되어 DB에 저장되었습니다.");
-            SwingUtilities.getWindowAncestor(this).dispose(); // 창 닫기
-        } else {
-            JOptionPane.showMessageDialog(this, "회원가입 실패: DB 저장 중 오류가 발생했습니다.");
-        }
-    }
-
 
     private JPanel centerPanel(String label, JComponent field) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -112,5 +78,30 @@ public class SignUpPanel extends JPanel {
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
         btn.setFont(new Font("SansSerif", Font.BOLD, 14));
+    }
+
+    @Override
+    public String getIdInput() {
+        return idField.getText().trim();
+    }
+
+    @Override
+    public String getPasswordInput() {
+        return new String(pwField.getPassword());
+    }
+
+    @Override
+    public String getPasswordCheckInput() {
+        return new String(pwCheckField.getPassword());
+    }
+
+    @Override
+    public void showMessage(String msg) {
+        JOptionPane.showMessageDialog(this, msg);
+    }
+
+    @Override
+    public void closeWindow() {
+        SwingUtilities.getWindowAncestor(this).dispose();
     }
 }
