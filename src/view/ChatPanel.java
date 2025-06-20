@@ -141,6 +141,40 @@ public class ChatPanel extends JPanel {
         scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
     }
 
+    public void appendSystemMessage(String msg) {
+        JPanel messagePanel = new JPanel(new BorderLayout());
+        messagePanel.setOpaque(false);
+
+        JLabel messageLabel = new JLabel("<html><p style='width: 200px;'>" + msg + "</p></html>");
+        messageLabel.setFont(new Font("맑은 고딕", Font.BOLD, 13));
+        messageLabel.setOpaque(true);
+        messageLabel.setBackground(new Color(255, 255, 200)); // 노란 배경
+        messageLabel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createEmptyBorder(5, 10, 5, 10),
+                BorderFactory.createLineBorder(Color.ORANGE, 1)
+        ));
+
+        JLabel meta = new JLabel("📢 시스템 알림");
+        meta.setFont(new Font("맑은 고딕", Font.ITALIC, 10));
+        meta.setForeground(Color.DARK_GRAY);
+
+        JPanel wrapper = new JPanel();
+        wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
+        wrapper.setBackground(Color.WHITE);
+        wrapper.add(meta);
+        wrapper.add(Box.createVerticalStrut(3));
+        wrapper.add(messageLabel);
+
+        messagePanel.add(wrapper, BorderLayout.CENTER); // 가운데 정렬
+
+        chatBox.add(messagePanel);
+        chatBox.add(Box.createVerticalStrut(8));
+
+        revalidate();
+        repaint();
+        scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
+    }
+
 
     public void appendMessage(String sender, String content) {
         boolean isMine = sender.equals(userId);

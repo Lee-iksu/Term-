@@ -1,7 +1,4 @@
-/service/
-/app/
+/Controller/
 /network/
 /view/
-/presenter/
-/Controller/
-/Handler/
+/app/

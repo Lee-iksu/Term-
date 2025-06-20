@@ -1,5 +1,3 @@
-// ServerMain.java (실행 진입점)
-// ServerMain.java (실행 진입점)
 package app;
 
 import network.ServerCore;
