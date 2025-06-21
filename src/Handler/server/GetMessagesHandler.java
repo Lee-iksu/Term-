@@ -1,5 +1,7 @@
 package Handler.server;
 
+import java.text.SimpleDateFormat;
+
 import com.google.gson.Gson;
 
 import model.ChatMessage;
@@ -16,6 +18,7 @@ public class GetMessagesHandler implements MessageHandler {
         Chatroom room = server.getChatrooms().get(roomId);
 
         if (room != null) {
+        	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
             for (ChatMessage cm : room.getMessages()) {
                 Message historyMsg = new Message();
                 historyMsg.setType("HISTORY_MSG");

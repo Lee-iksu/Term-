@@ -8,7 +8,8 @@ import service.UserDatabase;
 
 public class LoginHandler implements MessageHandler {
     public void handle(Message msg, ClientHandler handler, ServerCore server) {
-        handler.setClientId(msg.getId());
+    	server.removeClientById(msg.getId());
+    	handler.setClientId(msg.getId());
 
         if (UserDatabase.shared().getUserById(msg.getId()) == null) {
             User user = new User(msg.getId(), "");

@@ -99,6 +99,7 @@ public class ProfileController {
         request.setId(userId);
         request.setRcvid(targetId);
         out.println(gson.toJson(request));
+        out.flush();
     }
 
     public void decodeAndDisplayImage(String imageBase64, JLabel photoLabel) {

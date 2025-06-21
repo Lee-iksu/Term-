@@ -13,7 +13,8 @@ public class ChatPanel extends JPanel {
     private MultiChatController controller;
     private String userId;
     private int roomId;
-
+    private String targetId;
+    
     private JPanel chatBox;
     private JScrollPane scrollPane;
     private JTextField inputField;
@@ -22,6 +23,7 @@ public class ChatPanel extends JPanel {
         this.controller = controller;
         this.userId = userId;
         this.roomId = roomId;
+        this.targetId = targetId;
 
         setLayout(new BorderLayout());
 
@@ -49,25 +51,34 @@ public class ChatPanel extends JPanel {
         fileBtn.addActionListener(e -> sendPhoto());
 
         if (controller != null) {
-            controller.send("GET_MESSAGES|" + roomId);
+            Message msg = new Message();
+            msg.setType("GET_MESSAGES");
+            msg.setRoomId(roomId);
+            msg.setId(userId); 
+            controller.send(msg);
         }
+
     }
 
     private void sendMessage() {
+    	System.out.println("[DEBUG] sendMessage() 호출됨");
+
         String text = inputField.getText().trim();
+
         if (!text.isEmpty()) {
+            inputField.setText("");  
+            
             Message msg = new Message();
             msg.setType("SEND_MSG");
             msg.setRoomId(roomId);
             msg.setSender(userId);
+            msg.setReceiver(targetId);
             msg.setContent(text);
 
-            if (controller != null) {
+            if (controller != null)
                 controller.send(msg);
-            }
 
-            appendMessage(userId, text, true);  // ← 내 메시지 UI에 추가
-            inputField.setText("");
+            //appendMessage(userId, text, true);
         }
     }
 

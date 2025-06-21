@@ -149,6 +149,11 @@ public class MainFrame extends JFrame {
         add(contentPanel, BorderLayout.CENTER);
 
         chatRoomListPanel.setRoomSelectionHandler((roomName, roomId) -> {
+        	if (chatPanel != null && chatPanel.getRoomId() == roomId) {
+                cardLayout.show(contentPanel, "CHAT_ROOM");
+                return;
+            }
+        	
             this.chatPanel = new ChatPanel(chatRoomController.getController(), userId, roomId);
             contentPanel.add(chatPanel, "CHAT_ROOM");
             cardLayout.show(contentPanel, "CHAT_ROOM");
@@ -273,6 +278,11 @@ public class MainFrame extends JFrame {
     }
 
     public void showChatRoom(String roomName, int roomId) {
+    	if (chatPanel != null && chatPanel.getRoomId() == roomId) {
+            cardLayout.show(contentPanel, "CHAT_ROOM");
+            return;
+        }
+    	
         this.chatPanel = new ChatPanel(chatRoomController.getController(), userId, roomId); // ✅ controller 전달
         contentPanel.add(chatPanel, "CHAT_ROOM");
         cardLayout.show(contentPanel, "CHAT_ROOM");

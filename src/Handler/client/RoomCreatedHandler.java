@@ -1,12 +1,12 @@
 package Handler.client;
 
 import model.Message;
-import presenter.ChatController;
+import Controller.MultiChatController;
 
 public class RoomCreatedHandler implements MessageHandler {
-    private final ChatController controller;
+    private final MultiChatController controller;
 
-    public RoomCreatedHandler(ChatController controller) {
+    public RoomCreatedHandler(MultiChatController controller) {
         this.controller = controller;
     }
 
@@ -15,6 +15,6 @@ public class RoomCreatedHandler implements MessageHandler {
         int roomId = Integer.parseInt(m.getArgs()[0]);
         String name = m.getArgs()[1];
         String target = m.getArgs()[2];
-        controller.onRoomCreated(roomId, name, target);
+        controller.getChatRoomController().onRoomCreated(roomId, name, target);
     }
 }

@@ -1,11 +1,19 @@
 package view;
 
-import Controller.MultiChatController;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+
+import Controller.MultiChatController;
+import model.Message;
 
 public class SchedulePanel extends JPanel {
     private MultiChatController controller;
@@ -57,13 +65,17 @@ public class SchedulePanel extends JPanel {
             // 날짜 유효성 확인
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date date = sdf.parse(dateStr);
-
-            // 서버 전송: content에 날짜 + 내용 포함 (후처리 가능)
+            
             String combined = "[" + dateStr + "] " + content;
-            String protocol = String.format("SCHEDULE_ADD|0|%s|%s", userId, combined);
 
+            Message msg = new Message();
+            msg.setType("SCHEDULE_ADD");
+            msg.setRoomId(0); // 일정용 방
+            msg.setId(userId);
+            msg.setContent(combined);
+            
             if (controller != null) {
-                controller.send(protocol);
+                controller.send(msg);
             } else {
                 System.err.println("⚠️ SchedulePanel: controller가 연결되지 않았습니다.");
             }

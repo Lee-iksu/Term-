@@ -15,6 +15,10 @@ public class FriendListUpdateHandler implements MessageHandler {
     @Override
     public void handle(Message m) {
         List<String> list = m.getCheck();
+        if (list == null) {
+            System.err.println("FriendListUpdateHandler: check 리스트가 null입니다.");
+            return;
+        }
         SwingUtilities.invokeLater(() -> panel.updateFriendList(list));
     }
 }

@@ -1,7 +1,7 @@
 /Controller/
-/network/
 /view/
-/app/
 /Handler/
-/util/
 /presenter/
+/network/
+/model/
+/app/

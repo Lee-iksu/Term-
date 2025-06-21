@@ -1,7 +1,12 @@
 package network;//Stretgy패턴
 
+
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gson.Gson;
-import Handler.*;
+
+import Handler.server.CheckHandler;
 import Handler.server.CreateGroupRoomHandler;
 import Handler.server.CreateRoomHandler;
 import Handler.server.GetMessagesHandler;
@@ -13,9 +18,6 @@ import Handler.server.ProfileRequestHandler;
 import Handler.server.ProfileSaveHandler;
 import Handler.server.SendMessageHandler;
 import model.Message;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MessageDispatcher {
     private static final Map<String, MessageHandler> handlers = new HashMap<>();
@@ -30,6 +32,7 @@ public class MessageDispatcher {
         handlers.put("GET_MESSAGES", new GetMessagesHandler());
         handlers.put("CREATE_ROOM", new CreateRoomHandler());
         handlers.put("CREATE_GROUP_ROOM", new CreateGroupRoomHandler());
+        handlers.put("CHECK", new CheckHandler());
     }
 
     public static void dispatch(Message msg, ClientHandler handler, ServerCore server) {

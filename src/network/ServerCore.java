@@ -110,13 +110,16 @@ public class ServerCore implements Runnable {
     }
 
     public void sendTo(String userId, String message) {
-        for (ClientHandler c : clients) {
+        // 리스트를 뒤에서부터 순회해서 가장 최신 연결 하나만 전송
+        for (int i = clients.size() - 1; i >= 0; i--) {
+            ClientHandler c = clients.get(i);
             if (userId.equals(c.getClientId())) {
                 c.send(message);
                 return;
             }
         }
     }
+
 
     public void removeClient(ClientHandler handler) {
         clients.remove(handler);
@@ -133,9 +136,17 @@ public class ServerCore implements Runnable {
     }
 
     public void updateUserListBroadcast() {
-        model.Message update = new model.Message(
-            "server", "", "", "update_userlist", "all", new ArrayList<>(userList), userList.size()
-        );
-        broadcast(new com.google.gson.Gson().toJson(update));
+        Message update = new Message();
+        update.setType("CHECK");                  
+        update.setId("server");
+        update.setCheck(new ArrayList<>(userList));
+
+        String json = new Gson().toJson(update);
+        broadcast(json);                          
     }
+
+    public void removeClientById(String userId) {
+        clients.removeIf(c -> userId.equals(c.getClientId()));
+    }
+
 }
