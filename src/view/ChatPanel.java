@@ -50,13 +50,13 @@ public class ChatPanel extends JPanel {
         inputField.addActionListener(e -> sendMessage());
         fileBtn.addActionListener(e -> sendPhoto());
 
-        if (controller != null) {
+        /*if (controller != null) {
             Message msg = new Message();
             msg.setType("GET_MESSAGES");
             msg.setRoomId(roomId);
             msg.setId(userId); 
             controller.send(msg);
-        }
+        }*/
 
     }
 
@@ -239,4 +239,6 @@ public class ChatPanel extends JPanel {
     public int getRoomId() {
         return roomId;
     }
+    
+    
 }
