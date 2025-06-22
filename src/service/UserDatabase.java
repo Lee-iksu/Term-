@@ -23,7 +23,7 @@ public class UserDatabase {
             """;
             Statement stmt = conn.createStatement();
             stmt.execute(sql);
-            System.out.println("✅ user 테이블 확인 또는 생성 완료");
+            System.out.println("user 테이블 확인 또는 생성 완료");
         } catch (SQLException e) {
             e.printStackTrace();
         }

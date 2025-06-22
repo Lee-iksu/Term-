@@ -1,13 +1,19 @@
 package presenter;
 
-import Controller.MultiChatController;
-import model.Message;
-import view.ChatView;
-
-import javax.swing.*;
+import java.awt.Component;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Base64;
+
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
+import Controller.MultiChatController;
+import model.Message;
+import view.ChatView;
+import view.DatePickerDialog;
 
 public class ChatPresenter {
     private ChatView view;
@@ -61,6 +67,34 @@ public class ChatPresenter {
         }
     }
     
+    public void onCalendarButtonClicked() {
+        SwingUtilities.invokeLater(() -> {
+            JFrame parent = (JFrame) SwingUtilities.getWindowAncestor((Component) view);
+            DatePickerDialog dialog = new DatePickerDialog(parent);
+            dialog.setVisible(true);
+
+            if (dialog.isConfirmed()) {
+                String date = dialog.getSelectedDate();
+                String content = dialog.getScheduleText();
+
+                if (!content.isEmpty()) {
+                    String combined = "[" + date + "] " + content;
+
+                    Message msg = new Message();
+                    msg.setType("SCHEDULE_ADD");
+                    msg.setRoomId(view.getRoomId()); 
+                    msg.setId(view.getUserId());
+                    msg.setContent(combined);
+
+                    controller.send(msg); 
+                    view.appendSystemMessage("📅 추가됨: " + combined); 
+                } else {
+                    view.appendSystemMessage("📅 선택한 날짜: " + date + " (내용 없음)");
+                }
+            }
+        });
+    }
+
     public void setView(ChatView view) {
         this.view = view;
     }

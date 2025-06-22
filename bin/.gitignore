@@ -1,2 +1,10 @@
+/Controller/
+/Handler/
+/app/
+/img/
+/model/
+/network/
 /presenter/
+/service/
+/util/
 /view/

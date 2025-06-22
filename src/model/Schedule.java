@@ -8,6 +8,9 @@ public class Schedule {
     private String content;
     private String creator;
     private Date timestamp;
+    private String displayTitle;
+    private String creatorId;
+    private String otherId;
 
     public Schedule() {
         this.timestamp = new Date(); // 생성 시점으로 기본값 설정
@@ -54,4 +57,29 @@ public class Schedule {
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
+    
+    public String getDisplayTitle() {
+        return displayTitle;
+    }
+
+    public void setDisplayTitle(String displayTitle) {
+        this.displayTitle = displayTitle;
+    }
+    
+    public String getCreatorId() {
+        return creatorId;
+    }
+
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    public String getOtherId() {
+        return otherId;
+    }
+
+    public void setOtherId(String otherId) {
+        this.otherId = otherId;
+    }
+
 }

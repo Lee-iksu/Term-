@@ -6,7 +6,7 @@ public class ChatMessage {
     private String sender;
     private String content;
     private Date timestamp;
-    private int roomId;  // ✅ 추가
+    private int roomId; 
 
     public ChatMessage(String sender, String content, Date timestamp) {
         this.sender = sender;
@@ -14,7 +14,6 @@ public class ChatMessage {
         this.timestamp = timestamp;
     }
 
-    // ✅ 새로운 생성자
     public ChatMessage(String sender, String content, Date timestamp, int roomId) {
         this.sender = sender;
         this.content = content;

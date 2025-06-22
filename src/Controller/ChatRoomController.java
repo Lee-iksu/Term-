@@ -1,20 +1,21 @@
 package Controller;
 
-import com.google.gson.Gson;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import model.Chatroom;
 import model.Message;
 import view.ChatRoomListPanel;
 import view.ChatRoomSetupDialog;
-import view.MainFrame;
-
-import javax.swing.SwingUtilities;
 
 public class ChatRoomController {
     private MultiChatController controller;
     private String userId;
     private view.MainFrame mainFrame;
     private ChatRoomListPanel listPanel;
+    private final Map<Integer, Chatroom> chatroomMap = new HashMap<>();
 
 
     public ChatRoomController(MultiChatController controller, String userId, view.MainFrame mainFrame) {
@@ -75,23 +76,35 @@ public class ChatRoomController {
     public void onRoomCreated(int roomId, String roomName, String targetId) {
         System.out.println("[DEBUG] onRoomCreated() 진입");
         
-        // 기존 채팅방 목록 UI 갱신
+        Chatroom room = new Chatroom();
+        room.setId(roomId);
+        room.setName(roomName);
+        room.setGroup(false); // 단체 채팅은 아님
+        room.setMembers(List.of(userId, targetId)); // 나 + 상대방
+
+        chatroomMap.put(roomId, room); 
+
         if (listPanel != null) {
             System.out.println("[DEBUG] addChatRoom 호출: " + roomName + ", " + roomId);
-            listPanel.addChatRoom(roomName, roomId); // ← 목록에 추가
+            listPanel.addChatRoom(roomName, roomId); 
         } else {
             System.out.println("[ERROR] listPanel is null");
         }
         if (mainFrame != null) {
             mainFrame.showChatRoom(roomName, roomId);
         }
-        // ✅ 메시지 요청 전송
+        
         Message getMsg = new Message();
         getMsg.setType("GET_MESSAGES");
         getMsg.setRoomId(roomId);
-        getMsg.setId(userId);  // ✅ 꼭 필요
-        controller.send(getMsg);  // 문자열 아님!
+        getMsg.setId(userId);  
+        controller.send(getMsg);  
 
     }
+    
+    public Chatroom getChatroomById(int roomId) {
+        return chatroomMap.get(roomId);
+    }
+
 
 }

@@ -22,10 +22,13 @@ import javax.swing.JPanel;
 import Controller.ChatRoomController;
 import Controller.MultiChatController;
 import model.Message;
+import model.ScheduleModel;
 import model.User;
 import presenter.ChatPresenter;
 import presenter.MainPresenter;
 import presenter.ProfilePresenter;
+import presenter.SchedulePresenter;
+import service.ScheduleDatabase;
 import service.UserDatabase;
 
 public class MainFrame extends JFrame implements MainView {
@@ -114,7 +117,10 @@ public class MainFrame extends JFrame implements MainView {
         ); 
         profilePanel.setPresenter(profilePresenter); 
 
-        schedulePanel = new SchedulePanel(null, userId);
+        int defaultRoomId = 0;
+        schedulePanel = new SchedulePanel();
+        schedulePanel.loadScheduleForRoom(defaultRoomId);
+
 
         friendPanel.getPresenter().setProfileController(profilePresenter);
         this.chatRoomController = new ChatRoomController(controller, userId, this);

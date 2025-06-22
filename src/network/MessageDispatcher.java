@@ -16,6 +16,7 @@ import Handler.server.MessageHandler;
 import Handler.server.PhotoUploadHandler;
 import Handler.server.ProfileRequestHandler;
 import Handler.server.ProfileSaveHandler;
+import Handler.server.ScheduleAddHandler;
 import Handler.server.SendMessageHandler;
 import model.Message;
 
@@ -33,6 +34,7 @@ public class MessageDispatcher {
         handlers.put("CREATE_ROOM", new CreateRoomHandler());
         handlers.put("CREATE_GROUP_ROOM", new CreateGroupRoomHandler());
         handlers.put("CHECK", new CheckHandler());
+        handlers.put("SCHEDULE_ADD", new ScheduleAddHandler());
     }
 
     public static void dispatch(Message msg, ClientHandler handler, ServerCore server) {

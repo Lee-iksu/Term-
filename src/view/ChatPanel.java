@@ -2,6 +2,7 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 
 import javax.swing.BorderFactory;
@@ -45,10 +46,22 @@ public class ChatPanel extends JPanel implements ChatView {
 
         inputField = new JTextField();
         JButton sendBtn = new JButton("전송");
+
         JButton fileBtn = new JButton("📷");
+        JButton calendarBtn = new JButton("📅");
+
+        Dimension btnSize = new Dimension(50, 40);
+        fileBtn.setPreferredSize(btnSize);
+        calendarBtn.setPreferredSize(btnSize);
+
+        JPanel leftBtnPanel = new JPanel();
+        leftBtnPanel.setLayout(new BoxLayout(leftBtnPanel, BoxLayout.X_AXIS));
+        leftBtnPanel.add(fileBtn);
+        leftBtnPanel.add(Box.createHorizontalStrut(5));
+        leftBtnPanel.add(calendarBtn);
 
         JPanel inputPanel = new JPanel(new BorderLayout());
-        inputPanel.add(fileBtn, BorderLayout.WEST);
+        inputPanel.add(leftBtnPanel, BorderLayout.WEST);
         inputPanel.add(inputField, BorderLayout.CENTER);
         inputPanel.add(sendBtn, BorderLayout.EAST);
         add(inputPanel, BorderLayout.SOUTH);
@@ -56,9 +69,9 @@ public class ChatPanel extends JPanel implements ChatView {
         sendBtn.addActionListener(e -> presenter.onSendButtonClicked(inputField.getText()));
         inputField.addActionListener(e -> presenter.onSendButtonClicked(inputField.getText()));
         fileBtn.addActionListener(e -> presenter.onPhotoSendButtonClicked());
+        calendarBtn.addActionListener(e -> presenter.onCalendarButtonClicked()); // 반드시 presenter에 메서드 정의 필요
     }
 
-    // 구현된 ChatView 메서드
     @Override
     public void appendMessage(String sender, String content, boolean isMine) {
         JLabel messageLabel = new JLabel("<html><p style='width: 200px;'>" + content + "</p></html>");
@@ -89,13 +102,11 @@ public class ChatPanel extends JPanel implements ChatView {
         chatBox.add(Box.createVerticalStrut(5));
         revalidate();
         repaint();
-        scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
-        
-        SwingUtilities.invokeLater(() -> { //스크롤제일 하단으로
+
+        SwingUtilities.invokeLater(() -> {
             JScrollBar vertical = scrollPane.getVerticalScrollBar();
             vertical.setValue(vertical.getMaximum());
         });
-    
     }
 
     @Override

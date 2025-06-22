@@ -52,7 +52,7 @@ public class MultiChatController implements Runnable {
         dispatcher.register("CHECK", new FriendListUpdateHandler(mainFrame.getFriendPanel().getPresenter()));
         dispatcher.register("server", new ServerNotificationHandler(mainFrame.getChatPanel()));   
         dispatcher.register("HISTORY_MSG", new ChatMessageHandler(mainFrame));
-    
+        dispatcher.register("SCHEDULE_ADD", new Handler.client.ScheduleAddHandler(mainFrame));
     
     }
 
