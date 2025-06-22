@@ -9,7 +9,6 @@ import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
@@ -20,20 +19,19 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.google.gson.Gson;
-
 import Controller.ChatRoomController;
 import Controller.MultiChatController;
 import Controller.ProfileController;
 import model.Message;
 import model.User;
 import presenter.ChatPresenter;
+import presenter.MainPresenter;
 import service.UserDatabase;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements MainView {
     private JPanel contentPanel;
     private CardLayout cardLayout;
-    private MultiChatController controller; // ← 추가
+    private MultiChatController controller;
 
     private FriendPanel friendPanel;
     private ProfilePanel profilePanel;
@@ -41,26 +39,27 @@ public class MainFrame extends JFrame {
     private ChatPanel chatPanel;
     private SchedulePanel schedulePanel;
     private JLabel greetingLabel;
- // 필드 추가
 
     private final String userId;
     private final User myUser;
-
     private final Socket socket;
     private final PrintWriter out;
 
     private ChatRoomController chatRoomController;
+    private MainPresenter presenter;
 
-    public MainFrame(String userId, Socket socket, PrintWriter out, BufferedReader in, MultiChatController controller)  {
+    public MainFrame(String userId, Socket socket, PrintWriter out, BufferedReader in, MultiChatController controller) {
         this.userId = userId;
         this.socket = socket;
         this.out = out;
-        this.controller = controller; // ← 추가
+        this.controller = controller;
 
         User origin = UserDatabase.shared().getUserById(userId);
         this.myUser = new User(origin.getId(), origin.getPassword());
         this.myUser.setNickname(origin.getNickname());
         this.myUser.setIntro(origin.getIntro());
+
+        this.presenter = new MainPresenter(this, userId, out, socket);
 
         setTitle("OOPTalk - " + userId);
         setSize(420, 620);
@@ -88,7 +87,6 @@ public class MainFrame extends JFrame {
         JButton chatBtn = new JButton("채팅방");
         JButton scheduleBtn = new JButton("일정");
         JButton profileBtn = new JButton("설정");
-
         JButton[] buttons = { friendBtn, chatBtn, scheduleBtn, profileBtn };
 
         styleTabButton(friendBtn, true);
@@ -115,117 +113,44 @@ public class MainFrame extends JFrame {
         schedulePanel = new SchedulePanel(null, userId);
 
         friendPanel.getPresenter().setProfileController(profileController);
-
-        // ChatRoomController 설정
         this.chatRoomController = new ChatRoomController(controller, userId, this);
         controller.setChatRoomController(this.chatRoomController);
-        this.chatRoomController.setListPanel(chatRoomListPanel); 
+        this.chatRoomController.setListPanel(chatRoomListPanel);
         friendPanel.getPresenter().setChatRoomController(chatRoomController);
-        
-        
-     // 단체 채팅 생성 버튼 핸들러 등록
+
         chatRoomListPanel.setGroupRoomCreationHandler(() -> {
-            // 친구 리스트 가져오기
-        	List<String> friends = friendPanel.getPresenter().getFriendList(); // ✅ Presenter에서 가져옴
-
-        	new GroupChatSetupDialog(this, friends, (roomName, selectedIds) -> {
-        	    chatRoomController.createGroupChatRoom(roomName, selectedIds);
-        	}).setVisible(true);
-
-
+            List<String> friends = friendPanel.getPresenter().getFriendList();
             new GroupChatSetupDialog(this, friends, (roomName, selectedIds) -> {
                 chatRoomController.createGroupChatRoom(roomName, selectedIds);
             }).setVisible(true);
         });
 
-
         contentPanel.add(friendPanel, "FRIEND");
         contentPanel.add(chatRoomListPanel, "CHAT");
         contentPanel.add(schedulePanel, "SCHEDULE");
         contentPanel.add(profilePanel, "PROFILE");
-
         add(contentPanel, BorderLayout.CENTER);
 
         chatRoomListPanel.setRoomSelectionHandler((roomName, roomId) -> {
-            if (chatPanel != null && chatPanel.getRoomId() == roomId) {
-                cardLayout.show(contentPanel, "CHAT_ROOM");
-                return;
-            }
-
-            MultiChatController chatController = chatRoomController.getController(); // 이름 다르게
-            ChatPresenter presenter = new ChatPresenter(null, chatController);
-            ChatPanel newChatPanel = new ChatPanel(presenter, userId, roomId);
-            presenter.setView(newChatPanel);
-
-            this.chatPanel = newChatPanel;
-
-            contentPanel.add(newChatPanel, "CHAT_ROOM");
-            cardLayout.show(contentPanel, "CHAT_ROOM");
-
+            showChatRoom(roomName, roomId);
             Message getMsg = new Message();
             getMsg.setType("GET_MESSAGES");
             getMsg.setRoomId(roomId);
             getMsg.setId(userId);
-            chatController.send(getMsg);
+            controller.send(getMsg);
         });
 
-
-
-
-
-        friendBtn.addActionListener(e -> {
-            cardLayout.show(contentPanel, "FRIEND");
-            styleTabButton(friendBtn, true);
-            styleTabButton(chatBtn, false);
-            styleTabButton(scheduleBtn, false);
-            styleTabButton(profileBtn, false);
-        });
-
-        chatBtn.addActionListener(e -> {
-            cardLayout.show(contentPanel, "CHAT");
-            styleTabButton(friendBtn, false);
-            styleTabButton(chatBtn, true);
-            styleTabButton(scheduleBtn, false);
-            styleTabButton(profileBtn, false);
-        });
-
-        scheduleBtn.addActionListener(e -> {
-            cardLayout.show(contentPanel, "SCHEDULE");
-            styleTabButton(friendBtn, false);
-            styleTabButton(chatBtn, false);
-            styleTabButton(scheduleBtn, true);
-            styleTabButton(profileBtn, false);
-        });
-
-        profileBtn.addActionListener(e -> {
-            cardLayout.show(contentPanel, "PROFILE");
-            styleTabButton(friendBtn, false);
-            styleTabButton(chatBtn, false);
-            styleTabButton(scheduleBtn, false);
-            styleTabButton(profileBtn, true);
-        });
+        friendBtn.addActionListener(e -> presenter.onFriendTabClicked());
+        chatBtn.addActionListener(e -> presenter.onChatTabClicked());
+        scheduleBtn.addActionListener(e -> presenter.onScheduleTabClicked());
+        profileBtn.addActionListener(e -> presenter.onProfileTabClicked());
 
         cardLayout.show(contentPanel, "FRIEND");
 
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                try {
-                    Gson gson = new Gson();
-                    Message logoutMsg = new Message(userId, "", "logout", "all", "", null, 0);
-                    out.println(gson.toJson(logoutMsg));
-                    out.flush();
-                    Thread.sleep(300);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                } finally {
-                    try {
-                        socket.close();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                    System.out.println("로그아웃 메시지 전송 후 종료");
-                }
+                presenter.logout();
             }
         });
 
@@ -248,58 +173,52 @@ public class MainFrame extends JFrame {
         }
     }
 
-    public User getMyUser() {
-        return myUser;
+    @Override
+    public void showFriendPanel() {
+        cardLayout.show(contentPanel, "FRIEND");
     }
 
-    public void updateGreeting() {
-        String nickname = (myUser != null && myUser.getNickname() != null) ? myUser.getNickname() : userId;
+    @Override
+    public void showChatPanel() {
+        cardLayout.show(contentPanel, "CHAT");
+    }
+
+    @Override
+    public void showSchedulePanel() {
+        cardLayout.show(contentPanel, "SCHEDULE");
+    }
+
+    @Override
+    public void showProfilePanel() {
+        cardLayout.show(contentPanel, "PROFILE");
+    }
+
+    @Override
+    public void updateGreeting(String nickname) {
         greetingLabel.setText("좋은 하루 되세요, " + nickname + "님");
     }
 
-    public FriendPanel getFriendPanel() {
-        return friendPanel;
-    }
-
-    public ProfilePanel getProfilePanel() {
-        return profilePanel;
-    }
-
-    public ChatPanel getChatPanel() {
-        return chatPanel;
-    }
-
-    public SchedulePanel getSchedulePanel() {
-        return schedulePanel;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public ChatRoomListPanel getChatRoomListPanel() {
-        return chatRoomListPanel;
-    }
-
+    @Override
     public void showChatRoom(String roomName, int roomId) {
         if (chatPanel != null && chatPanel.getRoomId() == roomId) {
             cardLayout.show(contentPanel, "CHAT_ROOM");
             return;
         }
 
-        MultiChatController chatController = chatRoomController.getController(); //controller 받아옴
-        ChatPresenter presenter = new ChatPresenter(null, chatController);      // presenter 생성
-        ChatPanel newChatPanel = new ChatPanel(presenter, userId, roomId);      // view 생성
-        presenter.setView(newChatPanel);                                        // view 주입
-
-        this.chatPanel = newChatPanel;                                          // 필드에 할당
+        ChatPresenter presenter = new ChatPresenter(null, controller);
+        ChatPanel newChatPanel = new ChatPanel(presenter, userId, roomId);
+        presenter.setView(newChatPanel);
+        this.chatPanel = newChatPanel;
         contentPanel.add(newChatPanel, "CHAT_ROOM");
         cardLayout.show(contentPanel, "CHAT_ROOM");
     }
 
-    
-    public ChatRoomController getChatRoomController() {
-        return this.chatRoomController;
-    }
-
+    public User getMyUser() { return myUser; }
+    public FriendPanel getFriendPanel() { return friendPanel; }
+    public ProfilePanel getProfilePanel() { return profilePanel; }
+    public ChatPanel getChatPanel() { return chatPanel; }
+    public SchedulePanel getSchedulePanel() { return schedulePanel; }
+    public String getUserId() { return userId; }
+    public ChatRoomListPanel getChatRoomListPanel() { return chatRoomListPanel; }
+    public ChatRoomController getChatRoomController() { return this.chatRoomController; }
 }

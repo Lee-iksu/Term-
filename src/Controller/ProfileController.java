@@ -117,7 +117,7 @@ public class ProfileController {
 
     // 서버에서 PROFILE_RESPONSE 받았을 때 호출되면 되는 메서드 예시
     public void applyUpdatedProfile(String nickname, String intro, String imageBase64) {
-        mainFrame.updateGreeting();
+    	mainFrame.updateGreeting(nickname); 
         mainFrame.getFriendPanel().getPresenter().updateMyProfile();
         // 필요시 local 캐시에도 반영 가능
     }
