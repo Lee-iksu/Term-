@@ -49,8 +49,8 @@ public class MultiChatController implements Runnable {
         dispatcher.register("PROFILE_RESPONSE", new ProfileResponseHandler(mainFrame.getFriendPanel()));
         dispatcher.register("ROOM_CREATED", new RoomCreatedHandler(this));
         dispatcher.register("PHOTO_MSG", new PhotoMessageHandler(mainFrame));
-        dispatcher.register("CHECK", new FriendListUpdateHandler(mainFrame.getFriendPanel()));
-        dispatcher.register("server", new ServerNotificationHandler(mainFrame.getChatPanel()));       // 이미 있었을 것
+        dispatcher.register("CHECK", new FriendListUpdateHandler(mainFrame.getFriendPanel().getPresenter()));
+        dispatcher.register("server", new ServerNotificationHandler(mainFrame.getChatPanel()));   
         dispatcher.register("HISTORY_MSG", new ChatMessageHandler(mainFrame));
     
     

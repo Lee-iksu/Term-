@@ -9,46 +9,38 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Base64;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import Controller.ProfileController;
 import model.User;
+import presenter.FriendPresenter;
 import service.UserDatabase;
 
-public class FriendPanel extends JPanel {
+public class FriendPanel extends JPanel implements FriendView {
     private DefaultListModel<String> friendListModel = new DefaultListModel<>();
     private JList<String> friendList = new JList<>(friendListModel);
-    private ProfilePanel profilePanel;
-    private ProfileController profileController;
-    private Controller.ChatRoomController chatRoomController;
-
-    private String userId;
     private JLabel nicknameLabel;
     private JLabel introLabel;
     private JLabel profileImg;
-
-    private JPanel bottomPanel;
     private JButton startChatButton;
-    private String selectedFriendId = null;
+    private String userId;
+
+    private FriendPresenter presenter;
 
     public FriendPanel(String userId) {
         this.userId = userId;
+        this.presenter = new FriendPresenter(this, userId);
 
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -57,38 +49,30 @@ public class FriendPanel extends JPanel {
         String nickname = (me != null && me.getNickname() != null) ? me.getNickname() : userId;
         String imageBase64 = (me != null) ? me.getImageBase64() : "";
 
-        JPanel myProfilePanel = new JPanel(new BorderLayout(10, 0));
-        myProfilePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        myProfilePanel.setBackground(Color.WHITE);
-
         profileImg = new JLabel();
         profileImg.setPreferredSize(new Dimension(50, 50));
         setProfileImageFromBase64(imageBase64);
 
-        JPanel textPanel = new JPanel();
-        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
-        textPanel.setOpaque(false);
-
         nicknameLabel = new JLabel(nickname);
         nicknameLabel.setFont(new Font("맑은 고딕", Font.BOLD, 16));
-        nicknameLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
-
         introLabel = new JLabel(" ");
         introLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
         introLabel.setForeground(Color.DARK_GRAY);
-        introLabel.setHorizontalAlignment(SwingConstants.LEFT);
-        introLabel.setVerticalAlignment(SwingConstants.TOP);
-        introLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
 
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
+        textPanel.setOpaque(false);
         textPanel.add(nicknameLabel);
         textPanel.add(introLabel);
 
+        JPanel myProfilePanel = new JPanel(new BorderLayout(10, 0));
+        myProfilePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        myProfilePanel.setBackground(Color.WHITE);
         myProfilePanel.add(profileImg, BorderLayout.WEST);
         myProfilePanel.add(textPanel, BorderLayout.CENTER);
 
         JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
         separator.setForeground(new Color(200, 200, 200));
-        separator.setPreferredSize(new Dimension(1, 1));
 
         JPanel profileContainer = new JPanel(new BorderLayout());
         profileContainer.setBackground(Color.WHITE);
@@ -98,98 +82,72 @@ public class FriendPanel extends JPanel {
         friendList.setFont(new Font("맑은 고딕", Font.PLAIN, 13));
         friendList.setSelectionBackground(new Color(220, 240, 255));
         friendList.setBackground(Color.WHITE);
-        JScrollPane scrollPane = new JScrollPane(friendList);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-
         friendList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 String selectedUser = friendList.getSelectedValue();
-                if (selectedUser != null && !selectedUser.equals(userId)) {
-                    selectedFriendId = selectedUser;
-                    startChatButton.setText(selectedUser + "님과 채팅방 생성");
-                    startChatButton.setVisible(true);
-                } else {
-                    startChatButton.setVisible(false);
-                }
-
-                if (e.getClickCount() == 2 && profileController != null) {
-                    profileController.showUserProfile(selectedUser);
+                if (selectedUser != null) {
+                    presenter.onFriendSelected(selectedUser);
+                    if (e.getClickCount() == 2) {
+                        presenter.onFriendDoubleClicked(selectedUser);
+                    }
                 }
             }
         });
 
-        bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.setBackground(Color.WHITE);
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        JScrollPane scrollPane = new JScrollPane(friendList);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         startChatButton = new JButton();
         startChatButton.setVisible(false);
+        
         startChatButton.addActionListener(e -> {
-            if (selectedFriendId != null && chatRoomController != null) {
-                System.out.println("[DEBUG] ChatRoomController 호출됨");
-                chatRoomController.openChatRoomDialog(selectedFriendId);
-            } else {
-                System.err.println("[ERROR] ChatRoomController가 null입니다.");
-            }
+            presenter.onStartChatButtonClicked();
         });
 
-
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBackground(Color.WHITE);
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         bottomPanel.add(startChatButton, BorderLayout.CENTER);
 
         add(profileContainer, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
     }
-    
-    public String getUserId() {
-        return this.userId;
-    }
 
-    public void updateFriendList(List<String> users) {
+    @Override
+    public void showFriendList(List<String> users) {
         SwingUtilities.invokeLater(() -> {
             friendListModel.clear();
-            for (String user : users) {
+            for (String user : users)
                 friendListModel.addElement(user);
-            }
         });
     }
 
-    public void updateMyNickname() {
-        User me = UserDatabase.shared().getUserById(userId);
-        String nickname = (me != null && me.getNickname() != null) ? me.getNickname() : userId;
+    @Override
+    public void showUserProfile(String nickname, String intro, String imageBase64, boolean isMine) {
+        String labelText = isMine ? "<html>" + nickname + " <span style='color:#66CCCC; font-size:8px;'>내 프로필</span></html>" : nickname;
+        nicknameLabel.setText(labelText);
+        introLabel.setText((intro != null && !intro.isEmpty()) ? intro : "(No introduction)");
+        setProfileImageFromBase64(imageBase64);
+    }
+
+    @Override
+    public void updateMyInfo(String nickname) {
         nicknameLabel.setText(nickname);
         introLabel.setText(" ");
     }
 
-    public void setProfilePanel(ProfilePanel profilePanel) {
-        this.profilePanel = profilePanel;
+    @Override
+    public void enableChatButton(String friendId) {
+        startChatButton.setText(friendId + "님과 채팅방 생성");
+        startChatButton.setVisible(true);
     }
 
-    public void setProfileController(ProfileController controller) {
-        this.profileController = controller;
+    @Override
+    public void disableChatButton() {
+        startChatButton.setVisible(false);
     }
-    public void setChatRoomController(Controller.ChatRoomController controller) {
-        this.chatRoomController = controller;
-    }
-
-
-    public void displayUserInfo(String nickname, String intro, boolean isMine, String imageBase64) {
-        String labelText = isMine
-                ? "<html>" + nickname + " <span style='color:#66CCCC; font-size:8px;'>내 프로필</span></html>"
-                : nickname;
-        nicknameLabel.setText(labelText);
-        introLabel.setText((intro != null && !intro.isEmpty()) ? intro : "(No introduction)");
-        introLabel.setVisible(true);
-        setProfileImageFromBase64(imageBase64);
-        this.revalidate();
-        this.repaint();
-    }
-    
-    public DefaultListModel<String> getFriendListModel() {
-        return friendListModel;
-    }
-
 
     private void setProfileImageFromBase64(String imageBase64) {
         if (imageBase64 != null && !imageBase64.isEmpty()) {
@@ -211,4 +169,13 @@ public class FriendPanel extends JPanel {
             ex.printStackTrace();
         }
     }
+    
+    public FriendPresenter getPresenter() {
+        return presenter;
+    }
+    
+    public String getUserId() {
+        return this.userId;
+    }
+
 }

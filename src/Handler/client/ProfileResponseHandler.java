@@ -33,12 +33,13 @@ public class ProfileResponseHandler implements MessageHandler {
         }
 
         SwingUtilities.invokeLater(() -> {
-            panel.displayUserInfo(
+            panel.showUserProfile(
                 data.get("nickname"),
                 data.get("intro"),
-                isMe,
-                data.get("image")
+                data.get("image"),
+                isMe
             );
         });
+
     }
 }

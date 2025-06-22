@@ -1,15 +1,16 @@
 package Handler.client;
 
-import model.Message;
-import view.FriendPanel;
-import javax.swing.SwingUtilities;
 import java.util.List;
 
-public class FriendListUpdateHandler implements MessageHandler {
-    private final FriendPanel panel;
+import model.Message;
+import presenter.FriendPresenter;
+import view.FriendPanel;
 
-    public FriendListUpdateHandler(FriendPanel panel) {
-        this.panel = panel;
+public class FriendListUpdateHandler implements MessageHandler {
+    private final FriendPresenter presenter;
+
+    public FriendListUpdateHandler(FriendPresenter presenter) {
+    	this.presenter = presenter;
     }
 
     @Override
@@ -19,6 +20,6 @@ public class FriendListUpdateHandler implements MessageHandler {
             System.err.println("FriendListUpdateHandler: check 리스트가 null입니다.");
             return;
         }
-        SwingUtilities.invokeLater(() -> panel.updateFriendList(list));
+        presenter.loadFriendList(list);
     }
 }

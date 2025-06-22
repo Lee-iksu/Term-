@@ -12,7 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -114,27 +114,24 @@ public class MainFrame extends JFrame {
         profilePanel = new ProfilePanel(profileController);
         schedulePanel = new SchedulePanel(null, userId);
 
-        friendPanel.setProfilePanel(profilePanel);
-        friendPanel.setProfileController(profileController);
+        friendPanel.getPresenter().setProfileController(profileController);
 
         // ChatRoomController 설정
         this.chatRoomController = new ChatRoomController(controller, userId, this);
         controller.setChatRoomController(this.chatRoomController);
-        friendPanel.setChatRoomController(this.chatRoomController);
-        this.chatRoomController.setListPanel(chatRoomListPanel);
-        friendPanel.setChatRoomController(chatRoomController);
+        this.chatRoomController.setListPanel(chatRoomListPanel); 
+        friendPanel.getPresenter().setChatRoomController(chatRoomController);
         
         
      // 단체 채팅 생성 버튼 핸들러 등록
         chatRoomListPanel.setGroupRoomCreationHandler(() -> {
             // 친구 리스트 가져오기
-            java.util.List<String> friends = new ArrayList<>(friendPanel.getFriendListModel().elements().asIterator().next().length());
-            for (int i = 0; i < friendPanel.getFriendListModel().getSize(); i++) {
-                String id = friendPanel.getFriendListModel().getElementAt(i);
-                if (!id.equals(userId)) {
-                    friends.add(id);
-                }
-            }
+        	List<String> friends = friendPanel.getPresenter().getFriendList(); // ✅ Presenter에서 가져옴
+
+        	new GroupChatSetupDialog(this, friends, (roomName, selectedIds) -> {
+        	    chatRoomController.createGroupChatRoom(roomName, selectedIds);
+        	}).setVisible(true);
+
 
             new GroupChatSetupDialog(this, friends, (roomName, selectedIds) -> {
                 chatRoomController.createGroupChatRoom(roomName, selectedIds);
