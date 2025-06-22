@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Controller.ChatRoomController;
-import Controller.ProfileController;
 import model.User;
 import service.UserDatabase;
 import view.FriendView;
@@ -12,7 +11,7 @@ import view.FriendView;
 public class FriendPresenter {
     private final FriendView view;
     private final String userId;
-    private ProfileController profileController;
+    private ProfilePresenter profileController;
     private ChatRoomController chatRoomController;
     private String selectedFriendId;
 
@@ -53,7 +52,7 @@ public class FriendPresenter {
             view.updateMyInfo(me.getNickname());
     }
     
-    public void setProfileController(ProfileController profileController) {
+    public void setProfileController(ProfilePresenter profileController) {
         this.profileController = profileController;
     }
 

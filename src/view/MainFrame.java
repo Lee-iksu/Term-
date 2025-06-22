@@ -21,11 +21,11 @@ import javax.swing.JPanel;
 
 import Controller.ChatRoomController;
 import Controller.MultiChatController;
-import Controller.ProfileController;
 import model.Message;
 import model.User;
 import presenter.ChatPresenter;
 import presenter.MainPresenter;
+import presenter.ProfilePresenter;
 import service.UserDatabase;
 
 public class MainFrame extends JFrame implements MainView {
@@ -108,11 +108,15 @@ public class MainFrame extends JFrame implements MainView {
 
         friendPanel = new FriendPanel(userId);
         chatRoomListPanel = new ChatRoomListPanel();
-        ProfileController profileController = new ProfileController(userId, socket, out, in, this);
-        profilePanel = new ProfilePanel(profileController);
+        profilePanel = new ProfilePanel(null); 
+        ProfilePresenter profilePresenter = new ProfilePresenter(
+            profilePanel, userId, socket, out, in, this
+        ); 
+        profilePanel.setPresenter(profilePresenter); 
+
         schedulePanel = new SchedulePanel(null, userId);
 
-        friendPanel.getPresenter().setProfileController(profileController);
+        friendPanel.getPresenter().setProfileController(profilePresenter);
         this.chatRoomController = new ChatRoomController(controller, userId, this);
         controller.setChatRoomController(this.chatRoomController);
         this.chatRoomController.setListPanel(chatRoomListPanel);

@@ -1,24 +1,26 @@
-// ProfilePanel.java (MainView)
 package view;
 
-import Controller.ProfileController;
+import presenter.ProfilePresenter;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Base64;
 
-public class ProfilePanel extends JPanel {
+public class ProfilePanel extends JPanel implements ProfileView {
     private JTextField nicknameField;
     private JTextField introField;
     private JLabel photoLabel;
     private ImageIcon profileImage;
     private String imageBase64 = "";
 
-    private final ProfileController controller;
+    private ProfilePresenter presenter;
 
-    public ProfilePanel(ProfileController controller) {
-        this.controller = controller;
+    public ProfilePanel(ProfilePresenter presenter) {
+        this.presenter = presenter;
+        initUI();
+    }
 
+    private void initUI() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
@@ -37,15 +39,13 @@ public class ProfilePanel extends JPanel {
         photoLabel.setVerticalAlignment(JLabel.CENTER);
         photoLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true));
         photoLabel.setToolTipText("클릭하여 프로필 사진 업로드");
-        
-        ImageIcon logoIcon = new ImageIcon(getClass().getResource("/img/logo.png"));
-        Image logoImg = logoIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-        photoLabel.setIcon(new ImageIcon(logoImg));
+
+        setDefaultProfileImage();
 
         photoLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                controller.selectProfileImage(ProfilePanel.this);
+                presenter.selectProfileImage();
             }
         });
 
@@ -53,35 +53,12 @@ public class ProfilePanel extends JPanel {
         add(photoLabel);
         add(Box.createRigidArea(new Dimension(0, 10)));
 
-        JButton uploadButton = new JButton("사진 업로드");
-        uploadButton.setBackground(new Color(102, 204, 204));
-        uploadButton.setForeground(Color.WHITE);
-        uploadButton.setFocusPainted(false);
-        uploadButton.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
-        uploadButton.setPreferredSize(new Dimension(100, 30));
-        uploadButton.setAlignmentX(CENTER_ALIGNMENT);
-        uploadButton.addActionListener(e -> controller.selectProfileImage(ProfilePanel.this));
+        JButton uploadButton = createButton("사진 업로드", e -> presenter.selectProfileImage());
         add(uploadButton);
-
         add(Box.createRigidArea(new Dimension(0, 20)));
 
-        JLabel nicknameLabel = new JLabel("닉네임:");
-        nicknameLabel.setAlignmentX(CENTER_ALIGNMENT);
-        add(nicknameLabel);
-        nicknameField = new JTextField();
-        nicknameField.setMaximumSize(new Dimension(200, 25));
-        nicknameField.setAlignmentX(CENTER_ALIGNMENT);
-        add(nicknameField);
-
-        add(Box.createRigidArea(new Dimension(0, 10)));
-
-        JLabel introLabel = new JLabel("소개:");
-        introLabel.setAlignmentX(CENTER_ALIGNMENT);
-        add(introLabel);
-        introField = new JTextField();
-        introField.setMaximumSize(new Dimension(400, 25));
-        introField.setAlignmentX(CENTER_ALIGNMENT);
-        add(introField);
+        nicknameField = createLabeledTextField("닉네임:");
+        introField = createLabeledTextField("소개:");
 
         add(Box.createRigidArea(new Dimension(0, 20)));
 
@@ -92,29 +69,66 @@ public class ProfilePanel extends JPanel {
         saveButton.setFocusPainted(false);
         saveButton.setPreferredSize(new Dimension(100, 40));
         saveButton.setAlignmentX(CENTER_ALIGNMENT);
-        saveButton.addActionListener(e -> controller.handleSaveProfile(nicknameField.getText().trim(), introField.getText().trim(), imageBase64));
+        saveButton.addActionListener(e -> presenter.handleSaveProfile(
+            nicknameField.getText().trim(),
+            introField.getText().trim(),
+            imageBase64
+        ));
         add(saveButton);
-
-        controller.requestMyProfile();
     }
 
+    private void setDefaultProfileImage() {
+        ImageIcon logoIcon = new ImageIcon(getClass().getResource("/img/logo.png"));
+        Image logoImg = logoIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+        photoLabel.setIcon(new ImageIcon(logoImg));
+    }
+
+    private JButton createButton(String text, ActionListener listener) {
+        JButton button = new JButton(text);
+        button.setBackground(new Color(102, 204, 204));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
+        button.setPreferredSize(new Dimension(100, 30));
+        button.setAlignmentX(CENTER_ALIGNMENT);
+        button.addActionListener(listener);
+        return button;
+    }
+
+    private JTextField createLabeledTextField(String labelText) {
+        JLabel label = new JLabel(labelText);
+        label.setAlignmentX(CENTER_ALIGNMENT);
+        add(label);
+
+        JTextField field = new JTextField();
+        field.setMaximumSize(new Dimension(400, 25));
+        field.setAlignmentX(CENTER_ALIGNMENT);
+        add(field);
+        add(Box.createRigidArea(new Dimension(0, 10)));
+        return field;
+    }
+
+    @Override
     public void setProfileImage(ImageIcon imageIcon, String imageBase64) {
         this.imageBase64 = imageBase64;
         this.profileImage = imageIcon;
         photoLabel.setIcon(profileImage);
     }
 
+    @Override
     public void displayUserProfile(String nickname, String intro, String imageBase64) {
         nicknameField.setText(nickname);
         introField.setText(intro);
 
         if (imageBase64 == null || imageBase64.isEmpty()) {
-            ImageIcon fallback = new ImageIcon(getClass().getResource("/img/logo.png"));
-            Image logoImg = fallback.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-            photoLabel.setIcon(new ImageIcon(logoImg));
+            setDefaultProfileImage();
         } else {
-            controller.decodeAndDisplayImage(imageBase64, photoLabel);
+            presenter.decodeAndDisplayImage(imageBase64, photoLabel);
         }
+    }
+    
+    public void setPresenter(ProfilePresenter presenter) {
+        this.presenter = presenter;
     }
 
 }
