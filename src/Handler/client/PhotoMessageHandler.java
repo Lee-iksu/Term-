@@ -36,8 +36,10 @@ public class PhotoMessageHandler implements MessageHandler {
                 Image scaled = icon.getImage().getScaledInstance(160, 160, Image.SCALE_SMOOTH);
                 panel.appendImageMessage(m.getSender(), new ImageIcon(scaled));
             } else {
-                panel.appendMessage(m.getSender(), "[사진] " + m.getMsg() + " (파일 없음)");
+                boolean isMine = m.getSender().equals(panel.getUserId()); // 현재 사용자와 비교
+                panel.appendMessage(m.getSender(), "[사진] " + m.getMsg() + " (파일 없음)", isMine);
             }
+
         });
     }
 }

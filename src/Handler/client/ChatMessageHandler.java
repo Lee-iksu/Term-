@@ -16,9 +16,11 @@ public class ChatMessageHandler implements MessageHandler {
     public void handle(Message m) {
         if (mainFrame != null && mainFrame.getChatPanel() != null &&
             mainFrame.getChatPanel().getRoomId() == m.getRoomId()) {
-            SwingUtilities.invokeLater(() -> {
-                mainFrame.getChatPanel().appendMessage(m.getSender(), m.getContent());
-            });
+        	SwingUtilities.invokeLater(() -> {
+        	    boolean isMine = m.getSender().equals(mainFrame.getChatPanel().getUserId());
+        	    mainFrame.getChatPanel().appendMessage(m.getSender(), m.getContent(), isMine);
+        	});
+
         }
     }
 }
