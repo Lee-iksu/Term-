@@ -4,10 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.HashSet;
+import java.util.Set;
 
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -17,7 +16,8 @@ import presenter.SchedulePresenter;
 
 public class SchedulePanel extends JPanel implements ScheduleView {
     private final JTextArea scheduleArea = new JTextArea();
-    private SchedulePresenter presenter; // ← 이제는 setter로 바꿀 거야
+    private SchedulePresenter presenter; 
+    private final Set<String> displayedSchedules = new HashSet<>();
 
     public SchedulePanel() {
         setLayout(new BorderLayout());
@@ -71,6 +71,10 @@ public class SchedulePanel extends JPanel implements ScheduleView {
     }
     
     public void appendSchedule(String content) {
+        if (displayedSchedules.contains(content))
+            return; // 이미 출력된 일정이면 무시
+
+        displayedSchedules.add(content);
         scheduleArea.append(content + "\n");
     }
 
