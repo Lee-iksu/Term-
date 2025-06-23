@@ -214,6 +214,7 @@ public class MainFrame extends JFrame implements MainView {
     @Override
     public void showChatRoom(String roomName, int roomId) {
         if (chatPanel != null && chatPanel.getRoomId() == roomId) {
+        	chatPanel.clearMessages();
             cardLayout.show(contentPanel, "CHAT_ROOM");
             return;
         }

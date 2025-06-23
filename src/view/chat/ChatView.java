@@ -9,4 +9,5 @@ public interface ChatView {
     int getRoomId();
     void clearInputField();
     String getUserId();
+    void clearMessages();
 }

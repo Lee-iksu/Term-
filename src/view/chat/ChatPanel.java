@@ -180,6 +180,14 @@ public class ChatPanel extends JPanel implements ChatView {
     public String getUserId() {
         return userId;
     }
+    
+    @Override
+    public void clearMessages() {
+        chatBox.removeAll();
+        chatBox.revalidate();
+        chatBox.repaint();
+    }
+
 
     public void clearInputField() {
         inputField.setText("");

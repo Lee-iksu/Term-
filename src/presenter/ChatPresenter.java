@@ -97,6 +97,7 @@ public class ChatPresenter {
 
     public void setView(ChatView view) {
         this.view = view;
+        view.clearMessages(); 
     }
 
 }
