@@ -1,4 +1,4 @@
-package Controller;
+package network;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 
+import Controller.ChatRoomController;
 import Handler.client.ChatMessageHandler;
 import Handler.client.ClientMessageDispatcher;
 import Handler.client.FriendListUpdateHandler;
@@ -18,10 +19,8 @@ import Handler.client.ServerNotificationHandler;
 import model.Message;
 import view.main.MainFrame;
 
-public class MultiChatController implements Runnable { //전략패턴
+public class ClientCore implements Runnable { //전략패턴
     // 전체 통신 흐름 담당
-    // 서버 연결 + 메시지 전송 + 수신 스레드
-    // 뷰, 채팅방 컨트롤러 등과 연결됨
 
     private final String userId;           // 로그인한 사용자 ID
     private final Socket socket;           // 서버 연결 소켓
@@ -37,7 +36,7 @@ public class MultiChatController implements Runnable { //전략패턴
     private MainFrame mainFrame;           // 메인 프레임 참조
     private ChatRoomController chatRoomController; // 채팅방 컨트롤러 참조
 
-    public MultiChatController(String userId, Socket socket, PrintWriter outMsg, BufferedReader inMsg) {
+    public ClientCore(String userId, Socket socket, PrintWriter outMsg, BufferedReader inMsg) {
         // 기본 필드 초기화
         this.userId = userId;
         this.socket = socket;

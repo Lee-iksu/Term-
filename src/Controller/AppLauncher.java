@@ -2,6 +2,7 @@ package Controller;
 
 import javax.swing.*;
 
+import network.ClientCore;
 import view.main.MainFrame;
 
 import java.io.BufferedReader;
@@ -12,7 +13,7 @@ public class AppLauncher {
     public static void launch(String id, Socket socket, PrintWriter out, BufferedReader in) {
         SwingUtilities.invokeLater(() -> {
             // 컨트롤러 생성  
-            MultiChatController controller = new MultiChatController(id, socket, out, in);
+            ClientCore controller = new ClientCore(id, socket, out, in);
             
             // 메인 프레임 생성  
             MainFrame frame = new MainFrame(id, socket, out, in, controller);

@@ -20,9 +20,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import Controller.ChatRoomController;
-import Controller.MultiChatController;
 import model.Message;
 import model.User;
+import network.ClientCore;
 import presenter.ChatPresenter;
 import presenter.MainPresenter;
 import presenter.ProfilePresenter;
@@ -37,7 +37,7 @@ import view.schedule.SchedulePanel;
 public class MainFrame extends JFrame implements MainView {
     private JPanel contentPanel;
     private CardLayout cardLayout;
-    private MultiChatController controller;
+    private ClientCore controller;
 
     private FriendPanel friendPanel;
     private ProfilePanel profilePanel;
@@ -54,7 +54,7 @@ public class MainFrame extends JFrame implements MainView {
     private ChatRoomController chatRoomController;
     private MainPresenter presenter;
 
-    public MainFrame(String userId, Socket socket, PrintWriter out, BufferedReader in, MultiChatController controller) {
+    public MainFrame(String userId, Socket socket, PrintWriter out, BufferedReader in, ClientCore controller) {
         this.userId = userId;
         this.socket = socket;
         this.out = out;

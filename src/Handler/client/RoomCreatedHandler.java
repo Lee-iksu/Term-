@@ -1,15 +1,15 @@
 package Handler.client;
 
 import model.Message;
-import Controller.MultiChatController;
+import network.ClientCore;
 
 public class RoomCreatedHandler implements MessageHandler {
     // 채팅방 생성 응답 처리용 핸들러
     // 서버가 방 생성 후 보내주는 메시지 처리
 
-    private final MultiChatController controller;
+    private final ClientCore controller;
 
-    public RoomCreatedHandler(MultiChatController controller) {
+    public RoomCreatedHandler(ClientCore controller) {
         this.controller = controller;
     }
 

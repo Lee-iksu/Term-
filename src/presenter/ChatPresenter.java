@@ -10,16 +10,16 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import Controller.MultiChatController;
 import model.Message;
+import network.ClientCore;
 import view.chat.ChatView;
 import view.schedule.DatePickerDialog;
 
 public class ChatPresenter {
     private ChatView view;
-    private final MultiChatController controller;
+    private final ClientCore controller;
 
-    public ChatPresenter(ChatView view, MultiChatController controller) {
+    public ChatPresenter(ChatView view, ClientCore controller) {
         this.view = view;
         this.controller = controller;
     }

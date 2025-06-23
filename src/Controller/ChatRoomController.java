@@ -7,19 +7,20 @@ import java.util.Map;
 
 import model.Chatroom;
 import model.Message;
+import network.ClientCore;
 import view.chat.ChatRoomListPanel;
 import view.chat.ChatRoomSetupDialog;
 
 public class ChatRoomController {
     // 채팅방 관리  
 
-    private MultiChatController controller; // 서버 통신 담당  
+    private ClientCore controller; // 서버 통신 담당  
     private String userId; // 현재 사용자 id  
     private view.main.MainFrame mainFrame; // 메인 창 참조  
     private ChatRoomListPanel listPanel;   // 채팅방 목록 패널  
     private final Map<Integer, Chatroom> chatroomMap = new HashMap<>(); // roomId -> Chatroom 저장용  
 
-    public ChatRoomController(MultiChatController controller, String userId, view.main.MainFrame mainFrame) {
+    public ChatRoomController(ClientCore controller, String userId, view.main.MainFrame mainFrame) {
         this.controller = controller;
         this.userId = userId;
         this.mainFrame = mainFrame;
@@ -48,7 +49,7 @@ public class ChatRoomController {
         return args.toArray(new String[0]);
     }
 
-    public MultiChatController getController() {
+    public ClientCore getController() {
         return controller;
     }
 
