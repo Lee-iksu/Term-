@@ -35,7 +35,6 @@ public class ClientHandler extends Thread { //서버 측, 클라이언트 1명�
             Gson gson = new Gson();
 
             while ((msg = in.readLine()) != null) {
-                System.out.println("[DEBUG] 수신 원본 JSON: " + msg);
                 try {
                     JsonElement element = JsonParser.parseString(msg);
                     if (element.isJsonObject()) {

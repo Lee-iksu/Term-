@@ -17,7 +17,7 @@ public class ServerNotificationHandler implements MessageHandler {
 
     @Override
     public void handle(Message m) {
-        String log = "🟢 [알림] " + m.getId() + " " + m.getMsg();
+        String log = "[알림] " + m.getId() + " " + m.getMsg();
 
         // UI 작업 → EDT에서 실행
         SwingUtilities.invokeLater(() -> panel.appendSystemMessage(log));

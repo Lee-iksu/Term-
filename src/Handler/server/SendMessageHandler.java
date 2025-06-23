@@ -35,7 +35,6 @@ public class SendMessageHandler implements MessageHandler {
 
             // 방 참여자들에게 전송
             for (String member : new HashSet<>(room.getMembers())) {
-                System.out.println("[SERVER] " + msg.getSender() + " → " + msg.getReceiver() + " : " + msg.getContent());
                 server.sendTo(member, gson.toJson(forward));
             }
         }

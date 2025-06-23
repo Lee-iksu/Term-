@@ -23,8 +23,6 @@ public class ScheduleAddHandler implements MessageHandler {
 
     @Override
     public void handle(Message msg) {
-        System.out.println("[DEBUG] ScheduleAddHandler 수신됨: " + msg.getContent());
-
         String content = msg.getContent(); // [날짜] 내용
         int roomId = msg.getRoomId();
         String creatorId = msg.getId();  // 보내는 사람
@@ -50,7 +48,6 @@ public class ScheduleAddHandler implements MessageHandler {
                 sch.getContent().equals(s.getContent())
             );
 
-            System.out.println("[DEBUG] alreadyExists=" + alreadyExists);
 
             // 조건 만족 시 저장
             if (!alreadyExists && roomId != 0)
