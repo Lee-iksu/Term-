@@ -10,7 +10,8 @@ import model.Schedule;
 public class ScheduleDatabase {
     private static final String DB_URL = "jdbc:sqlite:game.db";
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
+    private static final ScheduleDatabase instance = new ScheduleDatabase();
+    
     static {
         try (Connection conn = DriverManager.getConnection(DB_URL);
              Statement stmt = conn.createStatement()) {
@@ -72,4 +73,33 @@ public class ScheduleDatabase {
         }
         return list;
     }
+    
+    public List<Schedule> findAll() {
+        List<Schedule> list = new ArrayList<>();
+        String sql = "SELECT * FROM schedule ORDER BY date ASC";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Schedule s = new Schedule();
+                s.setRoomId(rs.getInt("room_id"));
+                s.setCreatorId(rs.getString("creator_id"));
+                s.setOtherId(rs.getString("other_id"));
+                s.setContent(rs.getString("content"));
+                s.setScheduleDate(sdf.parse(rs.getString("date")));
+                list.add(s);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    
+    public static ScheduleDatabase shared() {
+        return instance;
+    }
+    
 }

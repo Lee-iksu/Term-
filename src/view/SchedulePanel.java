@@ -1,9 +1,13 @@
 package view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -24,6 +28,24 @@ public class SchedulePanel extends JPanel implements ScheduleView {
         scheduleArea.setLineWrap(true);
 
         add(new JScrollPane(scheduleArea), BorderLayout.CENTER);
+        
+        JPanel bottomBar = new JPanel();
+        bottomBar.setBackground(new Color(102, 204, 204));
+
+        /*JButton refreshButton = new JButton("새로고침");
+        refreshButton.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
+        refreshButton.setFocusPainted(false);
+        refreshButton.setMargin(new Insets(3, 8, 3, 8));
+        refreshButton.setBackground(new Color(102, 204, 204)); // ✅ 버튼만 민트색
+        refreshButton.setForeground(Color.WHITE);  
+        
+        refreshButton.addActionListener(e -> {
+            if (presenter != null)
+                presenter.updateViewFromAll(); // ✅ 전체 불러오기용으로 변경
+        });
+ㅅ
+
+        add(refreshButton, BorderLayout.SOUTH); // 그냥 아래 붙이기*/
     }
 
     public void loadScheduleForRoom(int roomId) {
@@ -47,5 +69,10 @@ public class SchedulePanel extends JPanel implements ScheduleView {
     public SchedulePresenter getPresenter() {
         return presenter;
     }
+    
+    public void appendSchedule(String content) {
+        scheduleArea.append(content + "\n");
+    }
+
 
 }

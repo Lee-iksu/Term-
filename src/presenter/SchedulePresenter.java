@@ -20,7 +20,7 @@ public class SchedulePresenter {
     }
 
     public void addSchedule(Schedule s) {
-        database.saveSchedule(s);  // DB에 저장
+        //database.saveSchedule(s);  
         updateView();              // 다시 전체 로드 후 출력
     }
 
@@ -38,13 +38,22 @@ public class SchedulePresenter {
                 ? UserDatabase.shared().getUserById(s.getOtherId()).getNickname()
                 : s.getOtherId();
 
-            sb.append(creatorNick).append(" - ").append(otherNick).append(" 의 일정\n");
-            sb.append("- ").append(s.getContent()).append("\n\n"); // 날짜 안 붙이고 content만
-
         }
 
         view.updateScheduleDisplay(sb.toString());
     }
+    
+    public void updateViewFromAll() {
+        List<Schedule> schedules = database.findAll(); // DB에 있는 일정 전체
+        StringBuilder sb = new StringBuilder();
+
+        for (Schedule s : schedules) {
+            sb.append(s.getContent()).append("\n");
+        }
+
+        view.updateScheduleDisplay(sb.toString());
+    }
+
 
 
     public void setView(ScheduleView view) {
