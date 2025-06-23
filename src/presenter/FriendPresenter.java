@@ -5,8 +5,8 @@ import java.util.List;
 
 import Controller.ChatRoomController;
 import model.User;
-import service.UserDatabase;
-import view.FriendView;
+import service.DAO.UserDatabase;
+import view.friend.FriendView;
 
 public class FriendPresenter {
     private final FriendView view;

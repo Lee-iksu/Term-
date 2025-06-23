@@ -1,4 +1,21 @@
-package network;//Stretgy패턴
+package network;
+
+/**
+ * 메시지 타입 -> 핸들러 연결
+ * Strategy 패턴 기반
+ * 
+ * 들어온 Message 객체
+ * msg.getType() 으로 분기
+ * 타입에 따라 등록된 handler 실행
+ * 
+ * static 블록에서 handler 사전 등록
+ * key는 문자열 타입 ("SEND_MSG", "CHECK" 등)
+ * 
+ * handler 없으면 -> broadcast로 전체 전송
+ * 
+ * if-else 없이 확장 가능하게 설계
+ * -> 메시지 타입 추가할 땐 handler만 등록
+ */
 
 
 import java.util.HashMap;

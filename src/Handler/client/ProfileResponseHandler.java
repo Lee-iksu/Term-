@@ -8,10 +8,12 @@ import com.google.gson.Gson;
 
 import model.Message;
 import model.User;
-import service.UserDatabase;
-import view.FriendPanel;
+import service.DAO.UserDatabase;
+import view.friend.FriendPanel;
 
 public class ProfileResponseHandler implements MessageHandler {
+    // 프로필 정보 수신 시 → 뷰 갱신
+
     private final FriendPanel panel;
 
     public ProfileResponseHandler(FriendPanel panel) {
@@ -20,9 +22,11 @@ public class ProfileResponseHandler implements MessageHandler {
 
     @Override
     public void handle(Message m) {
+        // JSON -> Map 변환
         Map<String,String> data = new Gson().fromJson(m.getProfile(), Map.class);
         boolean isMe = m.getId().equals(panel.getUserId());
 
+        // 본인인 경우 -> User 객체 정보 갱신
         if (isMe) {
             User me = UserDatabase.shared().getUserById(m.getId());
             if (me != null) {
@@ -32,6 +36,7 @@ public class ProfileResponseHandler implements MessageHandler {
             }
         }
 
+        // 프로필 패널에 정보 반영 (UI는 EDT에서)
         SwingUtilities.invokeLater(() -> {
             panel.showUserProfile(
                 data.get("nickname"),
@@ -40,6 +45,6 @@ public class ProfileResponseHandler implements MessageHandler {
                 isMe
             );
         });
-
     }
 }
+

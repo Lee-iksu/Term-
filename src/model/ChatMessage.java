@@ -1,4 +1,4 @@
-package model;
+package model; // 채팅방 내 개별 메시지(보낸이, 내용, 시간)를 표현
 
 import java.util.Date;
 

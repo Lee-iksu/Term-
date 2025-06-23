@@ -1,8 +1,8 @@
 package presenter;
 
 import model.User;
-import service.UserDatabase;
-import view.SignUpView;
+import service.DAO.UserDatabase;
+import view.signup.SignUpView;
 
 public class SignUpPresenter {
     private SignUpView view;

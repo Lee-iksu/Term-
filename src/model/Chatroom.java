@@ -1,4 +1,4 @@
-package model;
+package model; // 채팅방의 상태(참여자, 이름, 메시지 등)를 담는 모델
 
 import java.util.ArrayList;
 import java.util.List;

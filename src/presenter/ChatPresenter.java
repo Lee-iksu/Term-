@@ -12,8 +12,8 @@ import javax.swing.SwingUtilities;
 
 import Controller.MultiChatController;
 import model.Message;
-import view.ChatView;
-import view.DatePickerDialog;
+import view.chat.ChatView;
+import view.schedule.DatePickerDialog;
 
 public class ChatPresenter {
     private ChatView view;

@@ -1,4 +1,4 @@
-package model;
+package model; // 일정 정보(날짜, 내용 등)를 표현하는 모델 클래스
 
 import java.util.Date;
 

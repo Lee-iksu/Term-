@@ -7,7 +7,7 @@ import java.net.Socket;
 import com.google.gson.Gson;
 
 import model.Message;
-import view.MainView;
+import view.main.MainView;
 
 public class MainPresenter {
     private final MainView view;

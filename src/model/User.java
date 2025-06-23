@@ -1,4 +1,4 @@
-package model;
+package model; // 사용자 정보(id, 닉네임, 소개 등)를 담는 모델
 
 import util.PasswordEncryption;
 

@@ -3,8 +3,8 @@ package presenter;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import model.Message;
-import view.MainFrame;
-import view.ProfileView;
+import view.main.MainFrame;
+import view.profile.ProfileView;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,4 +1,4 @@
-package model;
+package model; // 클라이언트-서버 간 주고받는 메시지 데이터 구조
 
 import java.util.Date;
 import java.util.List;
@@ -12,8 +12,6 @@ public class Message {
     private List<String> check;
     private int people;
     private String profile;
-
-    // 추가 필드
     private String sender;
     private String receiver;
     private int roomId;

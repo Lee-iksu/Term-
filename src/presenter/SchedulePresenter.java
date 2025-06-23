@@ -4,9 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import model.Schedule;
-import service.ScheduleDatabase;
-import service.UserDatabase;
-import view.ScheduleView;
+import service.DAO.ScheduleDatabase;
+import service.DAO.UserDatabase;
+import view.schedule.ScheduleView;
 
 public class SchedulePresenter {
     private final ScheduleDatabase database;

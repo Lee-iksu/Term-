@@ -6,6 +6,16 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * 서버 GUI 인터페이스
+ * 
+ * JTextArea 로그 창 + 실행/종료 버튼 제공
+ * 
+ * 로그 출력을 위한 보조 UI
+ * 콘솔 없이도 서버 상태 확인 가능하게
+ */
+
+
 public class ServerUI extends JFrame {
     private JTextArea logArea = new JTextArea();
     private JButton startButton = new JButton("서버 실행");

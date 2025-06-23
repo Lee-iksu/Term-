@@ -7,11 +7,14 @@ import javax.swing.SwingUtilities;
 
 import model.Message;
 import model.Schedule;
-import service.ScheduleDatabase;
-import view.MainFrame;
-import view.SchedulePanel;
+import service.DAO.ScheduleDatabase;
+import view.main.MainFrame;
+import view.schedule.SchedulePanel;
 
 public class ScheduleAddHandler implements MessageHandler {
+    // 일정 추가 메시지 처리
+    // 서버에서 일정 도착 시 DB 저장 + UI 반영
+
     private final MainFrame mainFrame;
 
     public ScheduleAddHandler(MainFrame mainFrame) {
@@ -22,13 +25,13 @@ public class ScheduleAddHandler implements MessageHandler {
     public void handle(Message msg) {
         System.out.println("[DEBUG] ScheduleAddHandler 수신됨: " + msg.getContent());
 
-        String content = msg.getContent(); // 예: [2025-06-25] 발표 준비
+        String content = msg.getContent(); // [날짜] 내용
         int roomId = msg.getRoomId();
         String creatorId = msg.getId();  // 보내는 사람
-        String myId = mainFrame.getUserId(); // 로그인한 나
+        String myId = mainFrame.getUserId(); // 현재 사용자
 
         try {
-            // 날짜, 본문 파싱
+            // 날짜와 본문 파싱
             String dateStr = content.substring(content.indexOf("[") + 1, content.indexOf("]")).trim();
             String body = content.substring(content.indexOf("]") + 1).trim();
 
@@ -36,24 +39,24 @@ public class ScheduleAddHandler implements MessageHandler {
             Schedule s = new Schedule();
             s.setRoomId(roomId);
             s.setCreatorId(creatorId);
-            s.setOtherId(myId.equals(creatorId) ? "알 수 없음" : myId); // 상대방
+            s.setOtherId(myId.equals(creatorId) ? "알 수 없음" : myId);
             s.setScheduleDate(new SimpleDateFormat("yyyy-MM-dd").parse(dateStr));
-            s.setContent("[" + dateStr + "] " + body); // 그대로 저장
+            s.setContent("[" + dateStr + "] " + body);
 
+            // 중복 방지 확인
             List<Schedule> all = new ScheduleDatabase().findAll();
             boolean alreadyExists = all.stream().anyMatch(sch ->
                 sch.getCreatorId().equals(creatorId) &&
                 sch.getContent().equals(s.getContent())
             );
 
-            System.out.println("[DEBUG] creatorId=" + creatorId + ", roomId=" + roomId + ", content=" + s.getContent());
             System.out.println("[DEBUG] alreadyExists=" + alreadyExists);
 
+            // 조건 만족 시 저장
             if (!alreadyExists && roomId != 0)
                 new ScheduleDatabase().saveSchedule(s);
 
-
-            // UI에 추가
+            // UI에 표시
             SwingUtilities.invokeLater(() -> {
                 SchedulePanel sp = mainFrame.getSchedulePanel();
                 if (sp != null)

@@ -10,13 +10,15 @@ import network.ServerCore;
 import java.util.Arrays;
 
 public class CreateRoomHandler implements MessageHandler {
+    // 1:1 채팅방 생성 처리
+
     public void handle(Message msg, ClientHandler handler, ServerCore server) {
         Gson gson = new Gson();
+
         try {
             String senderId = msg.getArgs()[0];
             String targetId = msg.getArgs()[1];
             String roomName = msg.getArgs()[2];
-
             int roomId = (int) (System.currentTimeMillis() % 100000);
 
             Chatroom room = new Chatroom();
@@ -26,6 +28,7 @@ public class CreateRoomHandler implements MessageHandler {
             room.setMembers(Arrays.asList(senderId, targetId));
             server.getChatrooms().put(roomId, room);
 
+            // 각 사용자에게 ROOM_CREATED 메시지 개별 전송
             Message roomCreatedMsg1 = new Message();
             roomCreatedMsg1.setType("ROOM_CREATED");
             roomCreatedMsg1.setId("server");
@@ -42,6 +45,7 @@ public class CreateRoomHandler implements MessageHandler {
             server.sendTo(targetId, gson.toJson(roomCreatedMsg2));
 
             server.getUI().log("[DEBUG] ROOM_CREATED 전송 완료: " + roomName + " (" + roomId + ")");
+
         } catch (Exception e) {
             System.err.println("[ERROR] CREATE_ROOM 처리 중 예외 발생");
             e.printStackTrace();

@@ -3,7 +3,7 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-import service.ScheduleDatabase;
+import service.DAO.ScheduleDatabase;
 
 public class ScheduleModel {
     private final List<Schedule> schedules = new ArrayList<>();

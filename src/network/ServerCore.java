@@ -14,13 +14,34 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.google.gson.Gson;
 
 
+/**
+ * 서버 실행 및 관리 중심 클래스
+ * 
+ * 클라이언트 연결 수락
+ * ClientHandler 생성 후 리스트에 저장
+ * 
+ * 메시지 전송 방식:
+ * - broadcast(): 전체에게 전송
+ * - sendTo(): 특정 userId에게만 전송
+ * 
+ * 채팅방 목록(chatrooms), 그룹방 목록(groupChatRooms) 관리
+ * - 참여자 확인, 생성 여부 확인 기능 포함
+ * 
+ * 접속자 목록(userList) 관리
+ * - 로그인 시 추가, 종료 시 제거
+ * - CHECK 메시지로 목록 갱신 전파
+ * 
+ * 로그 출력을 위해 ServerUI 참조
+ */
+
+
 public class ServerCore implements Runnable {
     private ServerSocket serverSocket;
     private List<ClientHandler> clients = new ArrayList<>();
     private List<String> userList = new ArrayList<>();
     private Logger logger = Logger.getLogger(ServerCore.class.getName());
     private ServerUI ui;
- // ServerCore.java 내부
+    
     private final Map<String, List<String>> groupChatRooms = new ConcurrentHashMap<>();
 
     
@@ -32,7 +53,7 @@ public class ServerCore implements Runnable {
     public void createGroupChatRoom(String roomName, List<String> participantIds) {
         groupChatRooms.put(roomName, participantIds);
     }
- // ServerCore.java 안에 추가
+    
     public ClientHandler getClientHandler(String userId) {
         for (ClientHandler c : clients) {
             if (userId.equals(c.getClientId())) {

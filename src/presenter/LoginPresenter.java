@@ -1,7 +1,7 @@
 package presenter;
 
 import service.*;
-import view.LoginView;
+import view.login.LoginView;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;

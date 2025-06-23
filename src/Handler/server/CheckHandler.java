@@ -9,23 +9,20 @@ import network.ClientHandler;
 import network.ServerCore;
 
 public class CheckHandler implements MessageHandler {
+    // 클라이언트가 CHECK 요청 보냈을 때 -> 서버가 처리
+    // 현재 접속자 목록 반환
 
     @Override
     public void handle(Message msg, ClientHandler handler, ServerCore server) {
-        List<String> userList = server.getUserList();
+        List<String> userList = server.getUserList(); // 현재 접속중인 유저 ID 목록
 
         Message response = new Message();
-        response.setType("CHECK");
-        response.setId("server");
-        response.setRcvid(msg.getId()); // 요청자 ID
-        response.setCheck(userList);    // 친구 목록(또는 접속자 목록)
+        response.setType("CHECK");         // 응답 타입
+        response.setId("server");          // 서버가 보냄
+        response.setRcvid(msg.getId());    // 요청자에게 보냄
+        response.setCheck(userList);       // 리스트 담기
 
-        String json = new Gson().toJson(response);
-        
-        System.out.println("[DEBUG] CHECK 요청 처리, 유저리스트: " + userList);
-        System.out.println("[DEBUG] 응답 JSON: " + json);
-
-        System.out.println("[DEBUG] CHECK 응답 JSON: " + json);
-        handler.send(json);
+        String json = new Gson().toJson(response); // JSON 변환
+        handler.send(json); // 응답 전송
     }
 }

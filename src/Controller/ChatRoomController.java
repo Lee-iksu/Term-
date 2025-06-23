@@ -7,104 +7,115 @@ import java.util.Map;
 
 import model.Chatroom;
 import model.Message;
-import view.ChatRoomListPanel;
-import view.ChatRoomSetupDialog;
+import view.chat.ChatRoomListPanel;
+import view.chat.ChatRoomSetupDialog;
 
 public class ChatRoomController {
-    private MultiChatController controller;
-    private String userId;
-    private view.MainFrame mainFrame;
-    private ChatRoomListPanel listPanel;
-    private final Map<Integer, Chatroom> chatroomMap = new HashMap<>();
+    // 채팅방 관리  
 
+    private MultiChatController controller; // 서버 통신 담당  
+    private String userId; // 현재 사용자 id  
+    private view.main.MainFrame mainFrame; // 메인 창 참조  
+    private ChatRoomListPanel listPanel;   // 채팅방 목록 패널  
+    private final Map<Integer, Chatroom> chatroomMap = new HashMap<>(); // roomId -> Chatroom 저장용  
 
-    public ChatRoomController(MultiChatController controller, String userId, view.MainFrame mainFrame) {
+    public ChatRoomController(MultiChatController controller, String userId, view.main.MainFrame mainFrame) {
         this.controller = controller;
         this.userId = userId;
         this.mainFrame = mainFrame;
         System.out.println("[DEBUG] ChatRoomController 호출됨");
     }
-    
+
     public void createGroupChatRoom(String roomName, List<String> selectedIds) {
+        // 그룹 채팅방 생성 요청  
         Message msg = new Message();
-        msg.setType("CREATE_GROUP_ROOM");
-        msg.setId(userId);  // 방 만드는 사람
+        msg.setType("CREATE_GROUP_ROOM"); // 타입 지정  
+        msg.setId(userId); // 방 만든 사람
 
-        // 여기서 msg.setMsg(...) 반드시 호출
-        String joinedIds = String.join("|", selectedIds);
+        // 참여자 id들 조인  
+        String joinedIds = String.join("|", selectedIds); 
         String msgContent = userId + "|" + roomName + "|" + joinedIds;
-        msg.setMsg(msgContent);
+        msg.setMsg(msgContent); // 서버에서 파싱용
 
-        controller.send(msg);
+        controller.send(msg); // 서버로 전송
         System.out.println("[DEBUG] CREATE_GROUP_ROOM 메시지 전송됨: " + roomName);
     }
 
-
     private String[] buildArgs(String roomName, List<String> ids) {
+        // 서버에 넘길 args 조합  
         List<String> args = new ArrayList<>();
-        args.add(userId);        // 방 생성자 포함
-        args.add(roomName);      // 방 이름
-        args.addAll(ids);        // 참여자들
+        args.add(userId);       // 본인  
+        args.add(roomName);     // 방 이름  
+        args.addAll(ids);       // 참여자 목록  
         return args.toArray(new String[0]);
     }
-
 
     public MultiChatController getController() {
         return controller;
     }
 
     public void openChatRoomDialog(String targetId) {
+        // 채팅방 생성 창 띄움  
+        // 콜백으로 생성 함수 연결
         new ChatRoomSetupDialog(mainFrame, targetId, roomName -> {
             createChatRoomWithServer(roomName, targetId);
         }).setVisible(true);
     }
+
     public void setListPanel(ChatRoomListPanel panel) {
+        // 외부에서 패널 연결
         this.listPanel = panel;
     }
 
     private void createChatRoomWithServer(String roomName, String targetId) {
+        // 일반 채팅방 생성 요청 (1:1)  
         Message msg = new Message();
         msg.setType("CREATE_ROOM");
-        msg.setId(userId);
-        msg.setRcvid(targetId);
-        msg.setArgs(new String[]{userId, targetId, roomName});
+        msg.setId(userId);        // 생성자  
+        msg.setRcvid(targetId);   // 상대방  
+        msg.setArgs(new String[]{userId, targetId, roomName}); // 정보 전달
 
         controller.send(msg); 
         System.out.println("[DEBUG] CREATE_ROOM 메시지 전송됨: " + roomName);
     }
 
     public void onRoomCreated(int roomId, String roomName, String targetId) {
+        // 방 생성 응답 처리  
         System.out.println("[DEBUG] onRoomCreated() 진입");
-        
+
         Chatroom room = new Chatroom();
         room.setId(roomId);
         room.setName(roomName);
-        room.setGroup(false); // 단체 채팅은 아님
-        room.setMembers(List.of(userId, targetId)); // 나 + 상대방
+        room.setGroup(false); // 1:1 기준  
+        room.setMembers(List.of(userId, targetId)); // 참여자 저장  
 
-        chatroomMap.put(roomId, room); 
+        chatroomMap.put(roomId, room); // 맵에 등록
 
         if (listPanel != null) {
-            System.out.println("[DEBUG] addChatRoom 호출: " + roomName + ", " + roomId);
-            listPanel.addChatRoom(roomName, roomId); 
+            // UI에 반영  
+            listPanel.addChatRoom(roomName, roomId);
         } else {
             System.out.println("[ERROR] listPanel is null");
         }
+
         if (mainFrame != null) {
+            // UI에서 해당 채팅방 보여줌  
             mainFrame.showChatRoom(roomName, roomId);
         }
-        
+
+        // 이전 채팅 불러오기 요청  
         Message getMsg = new Message();
         getMsg.setType("GET_MESSAGES");
         getMsg.setRoomId(roomId);
         getMsg.setId(userId);  
         controller.send(getMsg);  
-
     }
-    
+
     public Chatroom getChatroomById(int roomId) {
+        // 채팅방 객체 반환  
         return chatroomMap.get(roomId);
     }
-
-
 }
+
+
+
