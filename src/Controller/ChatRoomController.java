@@ -23,7 +23,6 @@ public class ChatRoomController {
         this.controller = controller;
         this.userId = userId;
         this.mainFrame = mainFrame;
-        System.out.println("[DEBUG] ChatRoomController 호출됨");
     }
 
     public void createGroupChatRoom(String roomName, List<String> selectedIds) {
@@ -38,7 +37,6 @@ public class ChatRoomController {
         msg.setMsg(msgContent); // 서버에서 파싱용
 
         controller.send(msg); // 서버로 전송
-        System.out.println("[DEBUG] CREATE_GROUP_ROOM 메시지 전송됨: " + roomName);
     }
 
     private String[] buildArgs(String roomName, List<String> ids) {
@@ -76,12 +74,10 @@ public class ChatRoomController {
         msg.setArgs(new String[]{userId, targetId, roomName}); // 정보 전달
 
         controller.send(msg); 
-        System.out.println("[DEBUG] CREATE_ROOM 메시지 전송됨: " + roomName);
     }
 
     public void onRoomCreated(int roomId, String roomName, String targetId) {
         // 방 생성 응답 처리  
-        System.out.println("[DEBUG] onRoomCreated() 진입");
 
         Chatroom room = new Chatroom();
         room.setId(roomId);
