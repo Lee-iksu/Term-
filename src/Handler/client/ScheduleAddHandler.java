@@ -1,7 +1,6 @@
 package Handler.client;
 
 import java.text.SimpleDateFormat;
-
 import javax.swing.SwingUtilities;
 
 import model.Chatroom;
@@ -29,51 +28,42 @@ public class ScheduleAddHandler implements MessageHandler {
 
         try {
             // 상대방 아이디 추출
-        	Chatroom room = mainFrame.getChatRoomController().getChatroomById(roomId); // ✅ 바르게 수정
+            Chatroom room = mainFrame.getChatRoomController().getChatroomById(roomId);
             if (room == null) {
-            	System.err.println("[오류] 해당 roomId(" + roomId + ")의 Chatroom이 없습니다");
-            	return;
+                System.err.println("[오류] 해당 roomId(" + roomId + ")의 Chatroom이 없습니다");
+                return;
             }
-            
+
             String otherId = room.getMembers().stream()
                 .filter(id -> !id.equals(myId))
                 .findFirst()
                 .orElse("알 수 없음");
-            
+
             if (msg.getId().equals(otherId)) {
                 System.out.println("[DEBUG] 자기 자신과의 일정은 무시됨");
                 return;
             }
 
-            User user = UserDatabase.shared().getUserById(otherId);
-            String nickname = (user != null) ? user.getNickname() : otherId;
-
+            // 날짜와 내용 추출
             String dateStr = content.substring(content.indexOf("[") + 1, content.indexOf("]")).trim();
             String body = content.substring(content.indexOf("]") + 1).trim();
 
-            String myNickname = mainFrame.getMyUser().getNickname(); // 내 닉네임
-            String otherNickname = (user != null) ? user.getNickname() : otherId;
-
-            String title = myNickname + " - " + otherNickname + "의 일정";
-
+            // [날짜] 내용 형식 그대로 저장
             Schedule s = new Schedule();
             s.setRoomId(roomId);
-            s.setCreatorId(msg.getId());             // 저장용
-            s.setOtherId(otherId);                   // 저장용
-            s.setContent(body);
+            s.setCreatorId(msg.getId());
+            s.setOtherId(otherId);
+            s.setContent("[" + dateStr + "] " + body); // ✅ 이 한 줄만 content로 저장
             s.setScheduleDate(new SimpleDateFormat("yyyy-MM-dd").parse(dateStr));
-            s.setDisplayTitle(title);
-
 
             SwingUtilities.invokeLater(() -> {
                 SchedulePanel sp = mainFrame.getSchedulePanel();
-                sp.loadScheduleForRoom(roomId);    
-                sp.getPresenter().addSchedule(s);  
+                sp.loadScheduleForRoom(roomId);
+                sp.getPresenter().addSchedule(s);
             });
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 }

@@ -39,7 +39,8 @@ public class SchedulePresenter {
                 : s.getOtherId();
 
             sb.append(creatorNick).append(" - ").append(otherNick).append(" 의 일정\n");
-            sb.append("- [").append(sdf.format(s.getScheduleDate())).append("] ").append(s.getContent()).append("\n\n");
+            sb.append("- ").append(s.getContent()).append("\n\n"); // 날짜 안 붙이고 content만
+
         }
 
         view.updateScheduleDisplay(sb.toString());
